@@ -9,9 +9,8 @@ import { ToastContainer } from './components/ToastContainer';
 
 import Navbar from './components/Navbar';
 import SearchForm from './components/SearchForm';
-import CurrentWeather from './components/CurrentWeather';
-import Forecast from './components/Forecast';
-import WeatherChart from './components/WeatherChart';
+import PremiumDashboard from './components/PremiumDashboard';
+import { convertTemp, convertWind } from './utils/converters';
 import FavoritesList from './components/FavoritesList';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -32,13 +31,7 @@ function App() {
     localStorage.setItem('units', units);
   }, [units]);
 
-  const chartData = useMemo(() => {
-    if (!weatherData) return [];
-    return weatherData.forecast.map(day => ({
-      name: day.day,
-      temperature: convertTemp(day.tempHigh),
-    }));
-  }, [weatherData, units]);
+
 
   const handleSetDefault = (city) => {
     localStorage.setItem('defaultCity', city);
@@ -148,29 +141,13 @@ function App() {
                           key="weather-grid"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="weather-grid"
+                          className="premium-dashboard-wrapper w-full"
                         >
-                          <CurrentWeather
-                            weatherData={weatherData.current}
-                            onSetDefault={handleSetDefault}
-                            convertTemp={(t) => convertTemp(t, units)}
-                            convertWind={(w) => convertWind(w, units)}
-                            units={units}
-                          />
-                          <Forecast
-                            forecastData={weatherData.forecast}
+                          <PremiumDashboard 
+                            weatherData={weatherData}
                             convertTemp={(t) => convertTemp(t, units)}
                             units={units}
                           />
-                          <LiquidGlassCard 
-                            className="chart-section p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            borderRadius="2rem"
-                          >
-                            <WeatherChart data={chartData} />
-                          </LiquidGlassCard>
                         </motion.div>
                       )}
                     </AnimatePresence>

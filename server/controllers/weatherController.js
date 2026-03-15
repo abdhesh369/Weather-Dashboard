@@ -42,13 +42,24 @@ export const processForecast = (forecastList) => {
     dailyMap[date].conditions.add(item.weather[0].main);
   }
   
-  return Object.values(dailyMap).map((d) => ({
-    day: d.day,
-    tempHigh: Math.max(...d.temps),
-    tempLow: Math.min(...d.temps),
-    icon: d.icons.values().next().value,
-    condition: d.conditions.values().next().value,
-  })).slice(0, 5);
+  return {
+    daily: Object.values(dailyMap).map((d) => ({
+      day: d.day,
+      tempHigh: Math.max(...d.temps),
+      tempLow: Math.min(...d.temps),
+      icon: d.icons.values().next().value,
+      condition: d.conditions.values().next().value,
+    })).slice(0, 5),
+    hourly: forecastList.slice(0, 6).map((item) => {
+      // Return the next 18 hours (6 * 3-hour intervals)
+      return {
+        time: new Date(item.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+        temp: item.main.temp,
+        condition: item.weather[0].main,
+        icon: item.weather[0].icon,
+      };
+    })
+  };
 };
 
 export const getWeatherData = async (req, res) => {
