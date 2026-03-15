@@ -78,4 +78,4 @@ function FavoritesList({ onCityClick }) {
 }
 
 export default FavoritesList;
-鼓
+

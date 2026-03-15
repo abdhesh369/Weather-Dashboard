@@ -14,4 +14,4 @@ export function getCached(key) {
 export function setCached(key, data) {
   cache.set(key, { data, timestamp: Date.now() });
 }
-鼓
+
