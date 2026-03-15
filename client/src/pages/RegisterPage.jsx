@@ -1,12 +1,14 @@
 // client/src/pages/RegisterPage.js
 
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
+import api from '../lib/api';
+import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { WiDaySunny } from 'react-icons/wi';
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -30,10 +32,13 @@ function RegisterPage() {
     const newUser = { email, password };
 
     try {
-      await axios.post('/api/auth/register', newUser);
+      const res = await api.post('/api/auth/register', newUser);
       setSuccess('Registration successful!');
+      if (res.data.user) {
+        login(res.data.user);
+      }
       setTimeout(() => {
-        navigate('/login');
+        navigate('/');
       }, 1500);
     } catch (err) {
       if (err.response && err.response.data.message) {

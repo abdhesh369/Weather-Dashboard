@@ -1,7 +1,7 @@
 // client/src/pages/LoginPage.js
 
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { WiDaySunny } from 'react-icons/wi';
@@ -29,9 +29,9 @@ function LoginPage() {
     const user = { email, password };
 
     try {
-      const res = await axios.post('/api/auth/login', user);
-      if (res.data.token) {
-        login(res.data.token);
+      const res = await api.post('/api/auth/login', user);
+      if (res.data.user) {
+        login(res.data.user);
         navigate('/');
       }
     } catch (err) {

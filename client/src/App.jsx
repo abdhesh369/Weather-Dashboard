@@ -20,6 +20,8 @@ import './App.css';
 
 export const ToastContext = createContext(null);
 
+import { convertTemp, convertWind } from './utils/converters';
+
 function App() {
   const [units, setUnits] = useState(localStorage.getItem('units') || 'metric');
   const { weatherData, loading, error, searchHistory, fetchWeather, fetchByGeolocation } = useWeather();
@@ -28,16 +30,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem('units', units);
   }, [units]);
-
-  const convertTemp = (tempInCelsius) => {
-    if (units === 'metric') return Math.round(tempInCelsius);
-    return Math.round((tempInCelsius * 9 / 5) + 32);
-  };
-
-  const convertWind = (speedMs) => {
-    if (units === 'metric') return `${speedMs} m/s`;
-    return `${Math.round(speedMs * 2.237)} mph`;
-  };
 
   const chartData = useMemo(() => {
     if (!weatherData) return [];
@@ -123,13 +115,13 @@ function App() {
                         <CurrentWeather
                           weatherData={weatherData.current}
                           onSetDefault={handleSetDefault}
-                          convertTemp={convertTemp}
-                          convertWind={convertWind}
+                          convertTemp={(t) => convertTemp(t, units)}
+                          convertWind={(w) => convertWind(w, units)}
                           units={units}
                         />
                         <Forecast
                           forecastData={weatherData.forecast}
-                          convertTemp={convertTemp}
+                          convertTemp={(t) => convertTemp(t, units)}
                           units={units}
                         />
                         <div className="chart-section glass-card animate-fade">
