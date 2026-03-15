@@ -9,118 +9,120 @@ import favoritesRoutes from './routes/favorites.js';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
-import NodeCache from 'node-cache';
 import userRoutes from './routes/user.js';
+import { getCached, setCached } from './cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-const weatherCache = new NodeCache({ stdTTL: 600 }); // 10 minutes cache
-
-if (!process.env.JWT_SECRET) {
-  console.error('FATAL ERROR: JWT_SECRET is not defined.');
-  process.exit(1);
+const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET', 'WEATHER_API_KEY'];
+for (const key of REQUIRED_ENV) {
+  if (!process.env[key]) {
+    console.error(`Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
 }
 
 connectDB();
 
 const app = express();
-app.use(express.json());
-app.use(cookieParser());
 
 app.use(cors({
   origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
-  credentials: true
+  credentials: true,
 }));
+
+app.use(express.json());
+app.use(cookieParser());
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 requests per windowMs
-  message: 'Too many requests from this IP, please try again after 15 minutes'
+  max: 20,
+  message: { message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-app.use('/api/auth', authLimiter);
-
-
-const buildWeatherParams = (params) => {
-  const apiKey = process.env.WEATHER_API_KEY;
-  const baseParams = { appid: apiKey, units: 'metric' };
-  
-  if (params.city) {
-    baseParams.q = params.city;
-  } else if (params.lat && params.lon) {
-    baseParams.lat = params.lat;
-    baseParams.lon = params.lon;
-  } else {
-    throw new Error('Missing location parameters');
-  }
-  return baseParams;
+// Builds the API URL using URLSearchParams (keeps API key out of logs)
+const buildWeatherUrl = (base, params) => {
+  const url = new URL(base);
+  url.searchParams.set('appid', process.env.WEATHER_API_KEY);
+  url.searchParams.set('units', 'metric');
+  if (params.city) url.searchParams.set('q', params.city);
+  if (params.lat)  url.searchParams.set('lat', params.lat);
+  if (params.lon)  url.searchParams.set('lon', params.lon);
+  return url.toString();
 };
 
-const extractCurrentConditions = (currentData) => ({
-  city: currentData.name,
-  country: currentData.sys.country,
-  temperature: currentData.main.temp,
-  feelsLike: currentData.main.feels_like,
-  humidity: currentData.main.humidity,
-  windSpeed: currentData.wind.speed,
-  condition: currentData.weather[0].main,
-  description: currentData.weather[0].description,
-  icon: currentData.weather[0].icon,
+// Shapes the /weather endpoint response
+const extractCurrentConditions = (data) => ({
+  city: data.name,
+  country: data.sys.country,
+  temperature: data.main.temp,
+  feelsLike: data.main.feels_like,
+  humidity: data.main.humidity,
+  windSpeed: data.wind.speed,
+  condition: data.weather[0].main,
+  description: data.weather[0].description,
+  icon: data.weather[0].icon,
 });
 
-const processForecastData = (forecastData) => {
-  const dailyForecasts = {};
-  forecastData.list.forEach(item => {
+// Groups 3-hourly slots into daily forecasts
+const processForecast = (forecastList) => {
+  const dailyMap = {};
+  for (const item of forecastList) {
     const date = new Date(item.dt * 1000).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric'
+      year: 'numeric', month: 'long', day: 'numeric',
     });
-
-    if (!dailyForecasts[date]) {
-      dailyForecasts[date] = {
+    if (!dailyMap[date]) {
+      dailyMap[date] = {
         day: new Date(item.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' }),
         temps: [],
         icons: new Set(),
         conditions: new Set(),
       };
     }
-
-    dailyForecasts[date].temps.push(item.main.temp);
-    dailyForecasts[date].icons.add(item.weather[0].icon);
-    dailyForecasts[date].conditions.add(item.weather[0].main);
-  });
-
-  return Object.values(dailyForecasts).map(dayData => ({
-    day: dayData.day,
-    tempHigh: Math.max(...dayData.temps),
-    tempLow: Math.min(...dayData.temps),
-    icon: Array.from(dayData.icons)[0],
-    condition: Array.from(dayData.conditions)[0],
+    dailyMap[date].temps.push(item.main.temp);
+    dailyMap[date].icons.add(item.weather[0].icon);
+    dailyMap[date].conditions.add(item.weather[0].main);
+  }
+  return Object.values(dailyMap).map((d) => ({
+    day: d.day,
+    tempHigh: Math.max(...d.temps),
+    tempLow: Math.min(...d.temps),
+    icon: d.icons.values().next().value,
+    condition: d.conditions.values().next().value,
   })).slice(0, 5);
 };
 
+// Orchestrator — calls both APIs in parallel
 const fetchWeatherData = async (params) => {
-  const cacheKey = params.city ? `city:${params.city}` : `coords:${params.lat},${params.lon}`;
-  const cachedData = weatherCache.get(cacheKey);
-  if (cachedData) return cachedData;
+  const cacheKey = params.city
+    ? `city:${params.city.toLowerCase()}`
+    : `coords:${params.lat},${params.lon}`;
 
-  const baseParams = buildWeatherParams(params);
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
 
   const [currentRes, forecastRes] = await Promise.all([
-    axios.get('https://api.openweathermap.org/data/2.5/weather', { params: baseParams }),
-    axios.get('https://api.openweathermap.org/data/2.5/forecast', { params: baseParams })
+    axios.get(buildWeatherUrl('https://api.openweathermap.org/data/2.5/weather', params)),
+    axios.get(buildWeatherUrl('https://api.openweathermap.org/data/2.5/forecast', params)),
   ]);
 
-  const finalData = {
+  const result = {
     current: extractCurrentConditions(currentRes.data),
-    forecast: processForecastData(forecastRes.data)
+    forecast: processForecast(forecastRes.data.list),
   };
 
-  weatherCache.set(cacheKey, finalData);
-  return finalData;
+  setCached(cacheKey, result);
+  return result;
 };
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 app.get('/api/weather', async (req, res) => {
   try {
@@ -151,7 +153,7 @@ app.get('/api/weather/coords', async (req, res) => {
   }
 });
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/user', userRoutes);
 
@@ -164,8 +166,8 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+鼓

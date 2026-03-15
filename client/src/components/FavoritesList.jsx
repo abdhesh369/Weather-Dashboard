@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../lib/api';
-import toast from 'react-hot-toast';
 import { AuthContext } from '../context/AuthContext';
+import { ToastContext } from '../App';
 
 function FavoritesList({ onCityClick }) {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const { token, isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, token } = useContext(AuthContext);
+    const addToast = useContext(ToastContext);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -35,10 +36,10 @@ function FavoritesList({ onCityClick }) {
                 data: { city }
             });
             setFavorites(response.data);
-            toast.success(`${city} removed from favorites`);
+            addToast(`${city} removed from favorites`, 'success');
         } catch (err) {
             console.error('Error removing favorite:', err);
-            toast.error('Failed to remove favorite');
+            addToast('Failed to remove favorite', 'error');
         }
     };
 
@@ -77,3 +78,4 @@ function FavoritesList({ onCityClick }) {
 }
 
 export default FavoritesList;
+鼓

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import api from '../lib/api';
-import toast from 'react-hot-toast';
 import { AuthContext } from '../context/AuthContext';
+import { ToastContext } from '../App';
 import {
   WiDaySunny,
   WiCloudy,
@@ -37,8 +37,9 @@ const getWeatherIcon = (condition) => {
   }
 };
 
-function CurrentWeather({ weatherData, onSetDefault, convertTemp, units }) {
-  const { isAuthenticated, token } = useContext(AuthContext);
+function CurrentWeather({ weatherData, onSetDefault, convertTemp, convertWind, units }) {
+  const { isAuthenticated } = useContext(AuthContext);
+  const addToast = useContext(ToastContext);
 
   const {
     city,
@@ -54,10 +55,10 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, units }) {
   const handleAddToFavorites = async () => {
     try {
       await api.post("/api/favorites", { city: `${city}, ${country}` });
-      toast.success(`${city} added to favorites!`);
+      addToast(`${city} added to favorites!`, 'success');
     } catch (error) {
       console.error("Error adding to favorites:", error);
-      toast.error("Failed to add city to favorites.");
+      addToast("Failed to add city to favorites.", 'error');
     }
   };
 
@@ -98,7 +99,7 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, units }) {
           </div>
           <div className="stat-box" style={{ gridColumn: 'span 2' }}>
             <WiStrongWind size={24} />
-            <span>Wind: {units === 'metric' ? `${windSpeed} m/s` : `${Math.round(windSpeed * 2.237)} mph`}</span>
+            <span>Wind: {convertWind(windSpeed)}</span>
           </div>
         </div>
       </div>
@@ -107,3 +108,4 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, units }) {
 }
 
 export default CurrentWeather;
+鼓
