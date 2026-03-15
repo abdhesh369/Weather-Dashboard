@@ -75,7 +75,7 @@ export const getWeatherData = async (req, res) => {
       ? `city:${city.toLowerCase()}`
       : `coords:${lat},${lon}`;
 
-    const cached = getCached(cacheKey);
+    const cached = await getCached(cacheKey);
     if (cached) return res.json(cached);
 
     const [currentRes, forecastRes] = await Promise.all([
@@ -88,7 +88,7 @@ export const getWeatherData = async (req, res) => {
       forecast: processForecast(forecastRes.data.list),
     };
 
-    setCached(cacheKey, result);
+    await setCached(cacheKey, result);
     return res.json(result);
   } catch (error) {
     console.error('Weather Controller Error:', error.message);

@@ -1,17 +1,24 @@
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const cache = new Map();
+import { Redis } from 'ioredis';
 
-export function getCached(key) {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
-    cache.delete(key);
-    return null;
+const redis = new Redis(process.env.REDIS_URL);
+
+redis.on('error', (err) => {
+  console.warn('[Cache] Redis connection error:', err.message);
+});
+
+export async function getCached(key) {
+  try {
+    const value = await redis.get(key);
+    return value ? JSON.parse(value) : null;
+  } catch (err) {
+    return null; // graceful degradation — serve without cache
   }
-  return entry.data;
 }
 
-export function setCached(key, data) {
-  cache.set(key, { data, timestamp: Date.now() });
+export async function setCached(key, data) {
+  try {
+    await redis.set(key, JSON.stringify(data), 'EX', 600); // 10 minutes
+  } catch (err) {
+    console.warn('[Cache] Failed to set cache:', err.message);
+  }
 }
-

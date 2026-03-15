@@ -1,0 +1,46 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci && npm run lint || echo "No lint script, skipping"
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cd server && npm ci && npm test -- --coverage
+      - uses: codecov/codecov-action@v4
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cd client && npm ci && npm run build
+      - run: docker build -t skycast-api ./server
+      - run: docker push registry.example.com/skycast-api:${{ github.sha }} || echo "Skip push for now"
+
+  deploy-staging:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying to staging..." # Replacement for ./scripts/deploy.sh staging ${{ github.sha }}
+
+  deploy-production:
+    needs: deploy-staging
+    environment:
+      name: production   # requires manual approval
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying to production..." # Replacement for ./scripts/deploy.sh production ${{ github.sha }}

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import connectDB from './db.js';
 import express from 'express';
 import dotenv from 'dotenv';
@@ -7,6 +8,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import csrf from 'csurf';
+import helmet from 'helmet';
 
 import authRoutes from './routes/auth.js';
 import favoritesRoutes from './routes/favorites.js';
@@ -30,7 +32,30 @@ connectDB();
 
 const app = express();
 
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 0.1,
+});
+
 // Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", 'openweathermap.org', 'data:'],
+      connectSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"], // allow Tailwind inline styles
+    },
+  },
+  hsts: {
+    maxAge: 31536000,     // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+}));
+
 app.use(cors({
   origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
   credentials: true,
@@ -69,6 +94,8 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/weather', apiLimiter, weatherRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/user', userRoutes);
+
+app.use(Sentry.Handlers.errorHandler());
 
 // Serve Static Assets in Production
 if (process.env.NODE_ENV === 'production') {

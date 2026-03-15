@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema(
     favoriteCities: {
       type: [String],
       default: [],
+      validate: { validator: v => v.length <= 20, message: 'Cannot exceed 20 favourite cities.' }
+    },
+    refreshToken: {
+      type: String,
+      default: null
     },
     unitPreference: {
       type: String,

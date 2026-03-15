@@ -8,6 +8,11 @@ export const addFavorite = async (req, res) => {
             return res.status(400).json({ message: 'City name is required' });
         }
 
+        const currentUser = await User.findById(req.user._id);
+        if (currentUser && currentUser.favoriteCities.length >= 20) {
+            return res.status(400).json({ message: 'Maximum of 20 favourite cities reached.' });
+        }
+
         const user = await User.findByIdAndUpdate(
             req.user._id,
             { $addToSet: { favoriteCities: city } },
