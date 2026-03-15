@@ -1,8 +1,9 @@
 // client/src/App.jsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import axios from 'axios';
+import api from './lib/api';
+import { Toaster, toast } from 'react-hot-toast';
 
 import Navbar from './components/Navbar';
 import SearchForm from './components/SearchForm';
@@ -35,9 +36,6 @@ function App() {
     const defaultCity = localStorage.getItem('defaultCity');
     if (defaultCity) {
       fetchWeather({ city: defaultCity });
-    } else {
-      // Try geolocation as fallback if no default city
-      handleUseMyLocation();
     }
   }, []);
 
@@ -46,12 +44,24 @@ function App() {
     return Math.round((tempInCelsius * 9 / 5) + 32);
   };
 
+  const chartData = useMemo(() => {
+    if (!weatherData) return [];
+    return weatherData.forecast.map(day => ({
+      name: day.day,
+      temperature: convertTemp(day.tempHigh),
+    }));
+  }, [weatherData, units]);
+
   const handleSetDefault = (city) => {
     localStorage.setItem('defaultCity', city);
-    alert(`${city} has been set as your default city!`);
+    toast.success(`${city} set as default city!`);
   };
 
   const fetchWeather = async (params) => {
+    if (!params || (!params.city && (!params.lat || !params.lon))) {
+      console.warn('fetchWeather called with insufficient parameters');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -62,11 +72,11 @@ function App() {
         url = `/api/weather/coords?lat=${params.lat}&lon=${params.lon}`;
       }
 
-      const response = await axios.get(url);
+      const response = await api.get(url);
       const data = response.data;
       setWeatherData(data);
 
-      const cityName = data.current.city;
+      const cityName = `${data.current.city}, ${data.current.country}`;
       const updatedHistory = [cityName, ...searchHistory.filter(item => item !== cityName)].slice(0, 5);
       setSearchHistory(updatedHistory);
       localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
@@ -109,6 +119,7 @@ function App() {
 
   return (
     <div className={`app-wrapper ${getBackgroundClass()}`}>
+      <Toaster position="top-right" />
       <Navbar />
       <div className="App">
         <Routes>
@@ -135,8 +146,11 @@ function App() {
                           {searchHistory.map(city => (
                             <li
                               key={city}
+                              role="button"
+                              tabIndex={0}
                               className="history-item"
                               onClick={() => fetchWeather({ city })}
+                              onKeyDown={(e) => e.key === 'Enter' && fetchWeather({ city })}
                             >
                               {city}
                             </li>
@@ -173,13 +187,7 @@ function App() {
                         units={units}
                       />
                       <div className="chart-section glass-card animate-fade">
-                        {(() => {
-                          const chartData = weatherData.forecast.map(day => ({
-                            name: day.day,
-                            temperature: convertTemp(day.tempHigh),
-                          }));
-                          return <WeatherChart data={chartData} />;
-                        })()}
+                        <WeatherChart data={chartData} />
                       </div>
                     </div>
                   )}

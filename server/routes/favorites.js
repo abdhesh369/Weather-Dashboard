@@ -21,6 +21,10 @@ router.post('/', protect, async (req, res) => {
             { new: true }
         );
 
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
         res.status(200).json(user.favoriteCities);
     } catch (error) {
         console.error(error);
@@ -34,6 +38,9 @@ router.post('/', protect, async (req, res) => {
 router.get('/', protect, async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         res.status(200).json(user.favoriteCities);
     } catch (error) {
         console.error(error);
@@ -57,6 +64,10 @@ router.delete('/', protect, async (req, res) => {
             { $pull: { favoriteCities: city } },
             { new: true }
         );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
         res.status(200).json(user.favoriteCities);
     } catch (error) {

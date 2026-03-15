@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
+import toast from 'react-hot-toast';
 import { AuthContext } from '../context/AuthContext';
 
 function FavoritesList({ onCityClick }) {
@@ -17,11 +18,7 @@ function FavoritesList({ onCityClick }) {
     const fetchFavorites = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('/api/favorites', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await api.get('/api/favorites');
             setFavorites(response.data);
         } catch (err) {
             console.error('Error fetching favorites:', err);
@@ -34,16 +31,14 @@ function FavoritesList({ onCityClick }) {
     const handleRemoveFavorite = async (city, e) => {
         e.stopPropagation();
         try {
-            const response = await axios.delete('/api/favorites', {
-                data: { city },
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const response = await api.delete('/api/favorites', {
+                data: { city }
             });
             setFavorites(response.data);
+            toast.success(`${city} removed from favorites`);
         } catch (err) {
             console.error('Error removing favorite:', err);
-            alert('Failed to remove favorite');
+            toast.error('Failed to remove favorite');
         }
     };
 
@@ -59,13 +54,17 @@ function FavoritesList({ onCityClick }) {
                 {favorites.map((city) => (
                     <li
                         key={city}
+                        role="button"
+                        tabIndex={0}
                         className="history-item favorite-item"
                         onClick={() => onCityClick(city)}
+                        onKeyDown={(e) => e.key === 'Enter' && onCityClick(city)}
                     >
                         {city}
                         <button
                             className="btn-remove-favorite"
                             onClick={(e) => handleRemoveFavorite(city, e)}
+                            aria-label={`Remove ${city} from favorites`}
                             title="Remove from favorites"
                         >
                             ×

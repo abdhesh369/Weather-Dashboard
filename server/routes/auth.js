@@ -48,15 +48,23 @@ router.post('/login', async (req, res) => {
       },
     };
 
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' },
-      (err, token) => {
-        if (err) throw err;
-        res.status(200).json({ token });
-      }
-    );
+    const token = await new Promise((resolve, reject) => {
+      jwt.sign(
+        payload,
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' },
+        (err, t) => (err ? reject(err) : resolve(t))
+      );
+    });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000 // 1 hour
+    });
+
+    res.status(200).json({ token });
   } catch (error) {
     console.error('Login Error:', error.message);
     res.status(500).send('Server error');

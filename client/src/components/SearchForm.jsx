@@ -21,7 +21,7 @@ function SearchForm({ onSearch }) {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
             />
-            <button className="search-button">
+            <button className="search-button" aria-label="Search">
                 <FiSearch size={20} />
             </button>
         </form>

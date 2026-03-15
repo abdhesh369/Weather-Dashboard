@@ -1,5 +1,6 @@
 import { useContext } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
+import toast from 'react-hot-toast';
 import { AuthContext } from '../context/AuthContext';
 import {
   WiDaySunny,
@@ -52,19 +53,11 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, units }) {
 
   const handleAddToFavorites = async () => {
     try {
-      await axios.post(
-        "/api/favorites",
-        { city: `${city}, ${country}` },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      alert(`${city} added to favorites!`);
+      await api.post("/api/favorites", { city: `${city}, ${country}` });
+      toast.success(`${city} added to favorites!`);
     } catch (error) {
       console.error("Error adding to favorites:", error);
-      alert("Failed to add city to favorites.");
+      toast.error("Failed to add city to favorites.");
     }
   };
 
@@ -105,7 +98,7 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, units }) {
           </div>
           <div className="stat-box" style={{ gridColumn: 'span 2' }}>
             <WiStrongWind size={24} />
-            <span>Wind: {windSpeed} m/s</span>
+            <span>Wind: {units === 'metric' ? `${windSpeed} m/s` : `${Math.round(windSpeed * 2.237)} mph`}</span>
           </div>
         </div>
       </div>
