@@ -33,16 +33,17 @@ const getWeatherIcon = (condition) => {
 };
 
 import { motion } from "framer-motion";
+import { LiquidGlassCard } from './ui/liquid-weather-glass';
 
 function ForecastCard({ dayData, convertTemp, units }) {
   const { day, tempHigh, tempLow, condition } = dayData;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5, boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)" }}
-      className="forecast-card glass-card"
+    <LiquidGlassCard 
+      className="forecast-card"
+      borderRadius="1.5rem"
+      shadowIntensity="sm"
+      glowIntensity="xs"
     >
       <h3 className="forecast-day">{day}</h3>
       <motion.div 
@@ -58,7 +59,7 @@ function ForecastCard({ dayData, convertTemp, units }) {
         <span style={{ opacity: 0.3, fontWeight: '300' }}>/</span>
         <span className="temp-low" style={{ color: 'rgba(255,255,255,0.6)' }}>{convertTemp(tempLow)}°</span>
       </div>
-    </motion.div>
+    </LiquidGlassCard>
   );
 }
 

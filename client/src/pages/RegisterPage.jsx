@@ -5,6 +5,7 @@ import api from '../lib/api';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { WiDaySunny } from 'react-icons/wi';
+import { LiquidGlassCard } from '../components/ui/liquid-weather-glass';
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -51,7 +52,12 @@ function RegisterPage() {
 
   return (
     <div className="auth-page animate-fade">
-      <div className="auth-form-container glass-card">
+      <LiquidGlassCard 
+        className="auth-form-container"
+        borderRadius="2rem"
+        shadowIntensity="md"
+        glowIntensity="sm"
+      >
         <div className="auth-header">
           <WiDaySunny size={64} color="#ec4899" className="animate-pulse-slow" />
           <h1 className="brand-logo" style={{ background: 'linear-gradient(to right, #fff, #f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -100,7 +106,7 @@ function RegisterPage() {
         <div className="auth-footer">
           <p>Already have an account? <Link to="/login">Login</Link></p>
         </div>
-      </div>
+      </LiquidGlassCard>
     </div>
   );
 }

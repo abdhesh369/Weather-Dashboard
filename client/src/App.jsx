@@ -15,14 +15,13 @@ import WeatherChart from './components/WeatherChart';
 import FavoritesList from './components/FavoritesList';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import DemoPage from './pages/DemoPage';
 import UnitToggle from './components/UnitToggle';
 
 import './App.css';
 
 export const ToastContext = createContext(null);
 
-import { convertTemp, convertWind } from './utils/converters';
+import { LiquidGlassCard } from './components/ui/liquid-weather-glass';
 
 function App() {
   const [units, setUnits] = useState(localStorage.getItem('units') || 'metric');
@@ -77,12 +76,23 @@ function App() {
                       <h1>SkyCast</h1>
                       <UnitToggle units={units} setUnits={setUnits} />
                     </div>
-                    <div className="search-container glass-card">
+                    <LiquidGlassCard 
+                      className="search-container p-4"
+                      borderRadius="1.5rem"
+                      shadowIntensity="sm"
+                      glowIntensity="none"
+                    >
                       <SearchForm onSearch={(city) => fetchWeather({ city })} />
-                      <button className="btn-location" onClick={fetchByGeolocation} title="Use my current location">
+                      <motion.button 
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="btn-location" 
+                        onClick={fetchByGeolocation} 
+                        title="Use my current location"
+                      >
                         Use My Location
-                      </button>
-                    </div>
+                      </motion.button>
+                    </LiquidGlassCard>
 
                     <div className="dashboard-extras">
                       {searchHistory.length > 0 && (
@@ -110,26 +120,28 @@ function App() {
                   <main>
                     <AnimatePresence mode="wait">
                       {loading && (
-                        <motion.div 
+                        <LiquidGlassCard 
                           key="loading"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="loading-container glass-card"
+                          className="loading-container p-8"
+                          borderRadius="1.5rem"
                         >
                           <p className="loading-message">Fetching current conditions...</p>
-                        </motion.div>
+                        </LiquidGlassCard>
                       )}
                       {error && !loading && (
-                        <motion.div 
+                        <LiquidGlassCard 
                           key="error"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 20 }}
-                          className="error-container glass-card"
+                          className="error-container p-8"
+                          borderRadius="1.5rem"
                         >
                           <p className="error-message">{error}</p>
-                        </motion.div>
+                        </LiquidGlassCard>
                       )}
                       {weatherData && !loading && !error && (
                         <motion.div 
@@ -150,14 +162,15 @@ function App() {
                             convertTemp={(t) => convertTemp(t, units)}
                             units={units}
                           />
-                          <motion.div 
-                            className="chart-section glass-card"
+                          <LiquidGlassCard 
+                            className="chart-section p-6"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}
+                            borderRadius="2rem"
                           >
                             <WeatherChart data={chartData} />
-                          </motion.div>
+                          </LiquidGlassCard>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -167,7 +180,6 @@ function App() {
             />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/demo" element={<DemoPage />} />
           </Routes>
         </div>
       </div>

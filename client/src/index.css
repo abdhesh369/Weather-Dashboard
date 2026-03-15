@@ -69,21 +69,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism Utility */
-.glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: 1.5rem;
-    box-shadow: var(--glass-shadow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-.glass-card:hover {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transform: translateY(-4px);
-}
 
 /* Animations */
 @keyframes fadeIn {

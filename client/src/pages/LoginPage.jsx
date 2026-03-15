@@ -5,6 +5,7 @@ import api from '../lib/api';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { WiDaySunny } from 'react-icons/wi';
+import { LiquidGlassCard } from '../components/ui/liquid-weather-glass';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -45,7 +46,12 @@ function LoginPage() {
 
   return (
     <div className="auth-page animate-fade">
-      <div className="auth-form-container glass-card">
+      <LiquidGlassCard 
+        className="auth-form-container"
+        borderRadius="2rem"
+        shadowIntensity="md"
+        glowIntensity="sm"
+      >
         <div className="auth-header">
           <WiDaySunny size={64} color="#6366f1" className="animate-pulse-slow" />
           <h1 className="brand-logo">SkyCast</h1>
@@ -91,7 +97,7 @@ function LoginPage() {
         <div className="auth-footer">
           <p>Don't have an account? <Link to="/register">Sign up</Link></p>
         </div>
-      </div>
+      </LiquidGlassCard>
     </div>
   );
 }

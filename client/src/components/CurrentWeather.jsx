@@ -38,6 +38,7 @@ const getWeatherIcon = (condition) => {
 };
 
 import { motion } from 'framer-motion';
+import { LiquidGlassCard } from './ui/liquid-weather-glass';
 
 function CurrentWeather({ weatherData, onSetDefault, convertTemp, convertWind, units }) {
   const { isAuthenticated } = useContext(AuthContext);
@@ -67,10 +68,11 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, convertWind, u
   const unitLabel = units === 'metric' ? '°C' : '°F';
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="current-weather-card glass-card"
+    <LiquidGlassCard 
+      className="current-weather-card"
+      borderRadius="2rem"
+      shadowIntensity="md"
+      glowIntensity="sm"
     >
       <div className="weather-info-main">
         <motion.h2 
@@ -137,7 +139,7 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, convertWind, u
           </div>
         </div>
       </div>
-    </motion.div>
+    </LiquidGlassCard>
   );
 }
 
