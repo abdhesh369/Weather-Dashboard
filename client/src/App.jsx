@@ -1,7 +1,8 @@
 // client/src/App.jsx
 
 import React, { useState, useEffect, useMemo, createContext } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWeather } from './hooks/useWeather';
 import { useToast } from './hooks/useToast';
 import { ToastContainer } from './components/ToastContainer';
@@ -14,6 +15,7 @@ import WeatherChart from './components/WeatherChart';
 import FavoritesList from './components/FavoritesList';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import DemoPage from './pages/DemoPage';
 import UnitToggle from './components/UnitToggle';
 
 import './App.css';
@@ -56,14 +58,20 @@ function App() {
 
   return (
     <ToastContext.Provider value={addToast}>
-      <div className={`app-wrapper ${getBackgroundClass()}`}>
+      <div className={`app-wrapper transition-all duration-700 ${getBackgroundClass()}`}>
         <Navbar />
-        <div className="App">
+        <div className="App overflow-hidden">
           <Routes>
             <Route
               path="/"
               element={
-                <div className="dashboard-content animate-stagger">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="dashboard-content"
+                >
                   <header>
                     <div className="header-top">
                       <h1>SkyCast</h1>
@@ -100,41 +108,66 @@ function App() {
                   </header>
 
                   <main>
-                    {loading && (
-                      <div className="loading-container glass-card animate-fade">
-                        <p className="loading-message">Fetching current conditions...</p>
-                      </div>
-                    )}
-                    {error && !loading && (
-                      <div className="error-container glass-card animate-fade">
-                        <p className="error-message">{error}</p>
-                      </div>
-                    )}
-                    {weatherData && !loading && !error && (
-                      <div className="weather-grid">
-                        <CurrentWeather
-                          weatherData={weatherData.current}
-                          onSetDefault={handleSetDefault}
-                          convertTemp={(t) => convertTemp(t, units)}
-                          convertWind={(w) => convertWind(w, units)}
-                          units={units}
-                        />
-                        <Forecast
-                          forecastData={weatherData.forecast}
-                          convertTemp={(t) => convertTemp(t, units)}
-                          units={units}
-                        />
-                        <div className="chart-section glass-card animate-fade">
-                          <WeatherChart data={chartData} />
-                        </div>
-                      </div>
-                    )}
+                    <AnimatePresence mode="wait">
+                      {loading && (
+                        <motion.div 
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="loading-container glass-card"
+                        >
+                          <p className="loading-message">Fetching current conditions...</p>
+                        </motion.div>
+                      )}
+                      {error && !loading && (
+                        <motion.div 
+                          key="error"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className="error-container glass-card"
+                        >
+                          <p className="error-message">{error}</p>
+                        </motion.div>
+                      )}
+                      {weatherData && !loading && !error && (
+                        <motion.div 
+                          key="weather-grid"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="weather-grid"
+                        >
+                          <CurrentWeather
+                            weatherData={weatherData.current}
+                            onSetDefault={handleSetDefault}
+                            convertTemp={(t) => convertTemp(t, units)}
+                            convertWind={(w) => convertWind(w, units)}
+                            units={units}
+                          />
+                          <Forecast
+                            forecastData={weatherData.forecast}
+                            convertTemp={(t) => convertTemp(t, units)}
+                            units={units}
+                          />
+                          <motion.div 
+                            className="chart-section glass-card"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                          >
+                            <WeatherChart data={chartData} />
+                          </motion.div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </main>
-                </div>
+                </motion.div>
               }
             />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/demo" element={<DemoPage />} />
           </Routes>
         </div>
       </div>

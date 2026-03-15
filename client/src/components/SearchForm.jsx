@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { FiSearch } from "react-icons/fi";
 
+import { motion } from "framer-motion";
+
 function SearchForm({ onSearch }) {
     const [city, setCity] = useState("");
 
@@ -13,7 +15,12 @@ function SearchForm({ onSearch }) {
     };
 
     return (
-        <form className="search-form animate-fade" onSubmit={handleSubmit}>
+        <motion.form 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="search-form" 
+            onSubmit={handleSubmit}
+        >
             <input
                 type="text"
                 placeholder="Search city..."
@@ -21,10 +28,15 @@ function SearchForm({ onSearch }) {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
             />
-            <button className="search-button" aria-label="Search">
+            <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="search-button" 
+                aria-label="Search"
+            >
                 <FiSearch size={20} />
-            </button>
-        </form>
+            </motion.button>
+        </motion.form>
     )
 }
 

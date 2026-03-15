@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import csrf from 'csurf';
 
 import authRoutes from './routes/auth.js';
 import favoritesRoutes from './routes/favorites.js';
@@ -36,6 +37,13 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
+
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 // Rate Limiting
 const apiLimiter = rateLimit({

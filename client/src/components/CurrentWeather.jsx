@@ -37,6 +37,8 @@ const getWeatherIcon = (condition) => {
   }
 };
 
+import { motion } from 'framer-motion';
+
 function CurrentWeather({ weatherData, onSetDefault, convertTemp, convertWind, units }) {
   const { isAuthenticated } = useContext(AuthContext);
   const addToast = useContext(ToastContext);
@@ -65,28 +67,60 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, convertWind, u
   const unitLabel = units === 'metric' ? '°C' : '°F';
 
   return (
-    <div className="current-weather-card glass-card animate-fade">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="current-weather-card glass-card"
+    >
       <div className="weather-info-main">
-        <h2>{city}, {country}</h2>
-        <div className="temp-large">{convertTemp(temperature)}{unitLabel}</div>
+        <motion.h2 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          {city}, {country}
+        </motion.h2>
+        <motion.div 
+          className="temp-large"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
+        >
+          {convertTemp(temperature)}{unitLabel}
+        </motion.div>
         <p className="weather-description">{description}</p>
 
         <div className="weather-actions">
-          <button onClick={() => onSetDefault(city)} className="btn-set-default">
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onSetDefault(city)} 
+            className="btn-set-default"
+          >
             Make Default
-          </button>
+          </motion.button>
           {isAuthenticated && (
-            <button onClick={handleAddToFavorites} className="btn-add-favorite search-button">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAddToFavorites} 
+              className="btn-add-favorite search-button"
+            >
               Save Favorite
-            </button>
+            </motion.button>
           )}
         </div>
       </div>
 
       <div className="weather-stats-column">
-        <div className="weather-icon-large">
+        <motion.div 
+          className="weather-icon-large"
+          initial={{ rotate: -10, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           {getWeatherIcon(condition)}
-        </div>
+        </motion.div>
 
         <div className="weather-stats">
           <div className="stat-box">
@@ -103,7 +137,7 @@ function CurrentWeather({ weatherData, onSetDefault, convertTemp, convertWind, u
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

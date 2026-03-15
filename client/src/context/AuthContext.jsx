@@ -1,7 +1,7 @@
 // client/src/context/AuthContext.js
 
 import React, { createContext, useState, useEffect } from 'react';
-import api from '../lib/api';
+import api, { initCsrf } from '../lib/api';
 
 export const AuthContext = createContext(null);
 
@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        await initCsrf();
         const res = await api.get('/api/user/me');
         setUser(res.data);
         setIsAuthenticated(true);
