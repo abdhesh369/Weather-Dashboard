@@ -103,7 +103,7 @@ function App() {
 
   return (
     <ToastContext.Provider value={addToast}>
-      <div className={`app-wrapper ${bgClass}`} style={{ minHeight: '100vh' }}>
+      <div className={`app-wrapper ${bgClass} selection:bg-brand-primary/30 min-h-screen`}>
         <Navbar units={units} setUnits={setUnits} />
 
         <Routes>
@@ -132,11 +132,16 @@ function App() {
                       {error && !loading && (
                         <motion.div
                           key="error"
-                          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                          className="p-8 rounded-[20px] text-center"
-                          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
+                          initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                          className="glass p-12 text-center rounded-[32px] border-rose-500/20"
                         >
-                          <p className="text-[15px] font-semibold" style={{ color: '#f87171' }}>
+                          <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span className="text-3xl">⚠️</span>
+                          </div>
+                          <p className="text-[18px] font-bold text-white mb-2">
+                             Weather unavailable
+                          </p>
+                          <p className="text-[14px] text-white/40 max-w-[280px] mx-auto">
                             {error}
                           </p>
                         </motion.div>
@@ -145,15 +150,18 @@ function App() {
                       {!weatherData && !loading && !error && (
                         <motion.div
                           key="empty"
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                          className="py-24 text-center"
+                          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                          className="py-32 text-center"
                         >
-                          <div style={{ fontSize: 64, marginBottom: 16, opacity: 0.35 }}>🌤️</div>
-                          <p className="text-[20px] font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                            Search for a city
-                          </p>
-                          <p className="text-[14px]" style={{ color: 'rgba(255,255,255,0.35)', maxWidth: 280, margin: '0 auto' }}>
-                            Enter a city name or use your location to get started
+                          <div className="relative w-24 h-24 mx-auto mb-8">
+                             <div className="absolute inset-0 bg-brand-primary/20 blur-3xl rounded-full anim-float" />
+                             <div className="relative text-[80px] leading-none opacity-80">🌤️</div>
+                          </div>
+                          <h2 className="text-[24px] font-bold text-white mb-3">
+                            Ready to explore?
+                          </h2>
+                          <p className="text-[15px] text-white/40 max-w-[320px] mx-auto leading-relaxed">
+                            Search for a city or use your location to get live weather updates with premium visual effects.
                           </p>
                         </motion.div>
                       )}

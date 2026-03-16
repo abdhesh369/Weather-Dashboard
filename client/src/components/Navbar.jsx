@@ -9,43 +9,43 @@ export default function Navbar({ units, setUnits }) {
 
   return (
     <nav
-      className="sticky top-0 z-50 flex items-center justify-between px-6 h-[60px]"
+      className="sticky top-0 z-50 flex items-center justify-center w-full px-5 md:px-10 py-5"
       style={{
-        background: 'rgba(10,15,30,0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border-subtle)',
+        background: 'rgba(3, 7, 18, 0.65)',
+        backdropFilter: 'blur(24px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}
     >
+      <div className="flex items-center justify-between w-full max-w-[1100px] gap-6">
       {/* Brand */}
-      <Link to="/" className="flex items-center gap-2.5 no-underline">
+      <Link to="/" className="flex items-center gap-3.5 no-underline shrink-0">
         <div
-          className="w-8 h-8 rounded-[10px] flex items-center justify-center"
+          className="w-9 h-9 rounded-[12px] flex items-center justify-center shrink-0"
           style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}
         >
-          <Cloud size={16} color="#fff" />
+          <Cloud size={18} color="#fff" />
         </div>
-        <span className="text-white font-bold text-[17px] tracking-tight">SkyCast</span>
+        <span className="text-white font-bold text-[18px] tracking-tight hidden md:block">SkyCast</span>
       </Link>
 
       {/* Center nav pills */}
-      <div className="hidden sm:flex gap-1">
+      <div className="flex items-center gap-2 bg-white/5 p-1 rounded-full border border-white/5">
         {[
           { to: '/', label: 'Dashboard', icon: null, end: true },
           { to: '/map', label: 'Map', icon: <Map size={13} /> },
           { to: '/alerts', label: 'Alerts', icon: <Bell size={13} /> },
         ].map(({ to, label, icon, end }) => (
-          <NavLink key={to} to={to} end={end}>
+          <NavLink key={to} to={to} end={end} className="no-underline">
             {({ isActive }) => (
               <span
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] font-medium cursor-pointer transition-all duration-200"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-300 whitespace-nowrap"
                 style={{
-                  color: isActive ? '#fff' : 'var(--text-muted)',
-                  background: isActive ? 'var(--brand-primary-soft)' : 'transparent',
+                  color: isActive ? '#fff' : 'rgba(255,255,255,0.4)',
+                  background: isActive ? 'var(--brand-primary)' : 'transparent',
                 }}
               >
                 {icon}
-                {label}
+                <span className={icon ? 'hidden lg:block' : ''}>{label}</span>
               </span>
             )}
           </NavLink>
@@ -53,41 +53,38 @@ export default function Navbar({ units, setUnits }) {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-3">
-        <UnitToggle units={units} setUnits={setUnits} />
+      <div className="flex items-center gap-4 shrink-0">
+        <div className="hidden sm:block">
+          <UnitToggle units={units} setUnits={setUnits} />
+        </div>
 
         {isAuthenticated ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div
-              className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[12px] font-semibold cursor-pointer select-none"
-              style={{ background: 'linear-gradient(135deg,#6366f1,#ec4899)' }}
+              className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-[14px] font-bold cursor-pointer select-none border border-white/10"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}
               title={user?.email}
             >
-              {user?.email?.[0]?.toUpperCase() || <User size={14} />}
+              {user?.email?.[0]?.toUpperCase() || <User size={16} />}
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200"
-              style={{
-                border: '1px solid var(--border-default)',
-                background: 'var(--glass-bg)',
-                color: 'var(--text-secondary)',
-              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-300 glass hover:bg-rose-500/10 hover:border-rose-500/20 text-rose-400 group shrink-0"
             >
-              <LogOut size={12} />
-              Sign out
+              <LogOut size={14} className="group-hover:rotate-12 transition-transform" />
+              <span className="hidden md:block">Sign out</span>
             </button>
           </div>
         ) : (
-          <div className="flex gap-2">
-            <NavLink to="/login">
-              <span className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-white/70 hover:text-white transition-colors">
+          <div className="flex items-center gap-2">
+            <NavLink to="/login" className="no-underline">
+              <span className="px-4 py-2 rounded-full text-[13px] font-bold text-white/50 hover:text-white transition-colors">
                 Log in
               </span>
             </NavLink>
-            <NavLink to="/register">
+            <NavLink to="/register" className="no-underline">
               <span
-                className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-white transition-all duration-200"
+                className="px-5 py-2 rounded-full text-[13px] font-bold text-white transition-all duration-300 shadow-lg shadow-brand-primary/20"
                 style={{ background: 'var(--brand-primary)' }}
               >
                 Sign up
@@ -95,6 +92,7 @@ export default function Navbar({ units, setUnits }) {
             </NavLink>
           </div>
         )}
+      </div>
       </div>
     </nav>
   );

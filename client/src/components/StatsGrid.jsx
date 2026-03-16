@@ -4,24 +4,29 @@ import { convertWind } from '../utils/converters';
 function StatCard({ label, value, sub, percent, barGradient, delay = 0 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay }}
-      className="p-4 rounded-[14px]"
-      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="glass p-8 rounded-[24px] group"
     >
-      <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5" style={{ color: 'rgba(255,255,255,0.38)' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.1em] mb-4 opacity-40">
         {label}
       </p>
-      <p className="text-[22px] font-bold text-white leading-none mb-0.5">{value}</p>
-      <p className="text-[11px] mb-2.5" style={{ color: 'rgba(255,255,255,0.38)' }}>{sub}</p>
-      <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+      <p className="text-[26px] font-bold text-white leading-none mb-1 transition-transform duration-300 group-hover:translate-x-1">{value}</p>
+      <p className="text-[12px] mb-4 opacity-50 font-medium">{sub}</p>
+      
+      <div className="h-1.5 rounded-full overflow-hidden bg-white/5 relative">
         <motion.div
           className="h-full rounded-full"
           style={{ background: barGradient }}
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(Math.max(percent, 0), 100)}%` }}
-          transition={{ duration: 0.7, delay: delay + 0.15, ease: 'easeOut' }}
+          transition={{ duration: 1, delay: delay + 0.2, ease: [0.16, 1, 0.3, 1] }}
+        />
+        {/* Glow effect on the progress bar */}
+        <div 
+          className="absolute top-0 right-0 h-full w-4 blur-sm opacity-50"
+          style={{ background: 'white' }}
         />
       </div>
     </motion.div>

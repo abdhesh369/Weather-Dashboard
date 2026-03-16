@@ -1,19 +1,19 @@
 export default function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-4 w-full anim-fade-in">
+    <div className="flex flex-col gap-5 w-full anim-fade-in">
       {/* Hero skeleton */}
-      <div className="skeleton rounded-[28px]" style={{ height: 280 }} />
+      <div className="skeleton rounded-[32px]" style={{ height: 320 }} />
 
       {/* Hourly skeleton */}
-      <div className="skeleton rounded-[20px]" style={{ height: 108 }} />
+      <div className="skeleton rounded-[32px]" style={{ height: 120 }} />
 
       {/* Chart skeleton */}
-      <div className="skeleton rounded-[20px]" style={{ height: 220 }} />
+      <div className="skeleton rounded-[32px]" style={{ height: 260 }} />
 
       {/* Stats skeleton */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="skeleton rounded-[14px]" style={{ height: 90 }} />
+          <div key={i} className="skeleton rounded-[24px]" style={{ height: 140 }} />
         ))}
       </div>
     </div>

@@ -19,12 +19,9 @@ function getEmoji(condition = '') {
 
 export default function HourlyForecast({ hourlyData = [], units }) {
   return (
-    <div
-      className="p-5 rounded-[24px] flex flex-col gap-4"
-      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
-    >
-      <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: 'rgba(255,255,255,0.38)' }}>
-        Hourly forecast
+    <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
+      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+        Hourly Forecast
       </p>
 
       <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-1">

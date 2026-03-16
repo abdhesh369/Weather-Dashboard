@@ -12,10 +12,11 @@
   --brand-pink:          #ec4899;
 
   /* ── Backgrounds ───────────────────────────────── */
-  --bg-base:    #0a0f1e;
-  --bg-surface: rgba(255, 255, 255, 0.06);
-  --bg-raised:  rgba(255, 255, 255, 0.09);
-  --bg-overlay: rgba(0, 0, 0, 0.35);
+  --bg-base:    #030712;
+  --bg-surface: rgba(255, 255, 255, 0.03);
+  --bg-raised:  rgba(255, 255, 255, 0.06);
+  --bg-overlay: rgba(0, 0, 0, 0.45);
+  --brand-glow: 0 0 20px rgba(99, 102, 241, 0.3);
 
   /* ── Borders ───────────────────────────────────── */
   --border-subtle:  rgba(255, 255, 255, 0.08);
@@ -47,10 +48,11 @@
   --bg-default:linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
 
   /* ── Glassmorphism ──────────────────────────────── */
-  --glass-bg:     rgba(255, 255, 255, 0.06);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-blur:   blur(16px);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+  --glass-bg:     rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur:   blur(24px);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.50);
+  --glass-inner-border: rgba(255, 255, 255, 0.05);
 
   /* ── Spacing scale ──────────────────────────────── */
   --space-1:  4px;

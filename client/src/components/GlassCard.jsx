@@ -5,12 +5,8 @@
 export default function GlassCard({ children, className = '', style = {}, padding = '20px 24px' }) {
   return (
     <div
-      className={`rounded-[20px] ${className}`}
+      className={`glass rounded-[24px] ${className}`}
       style={{
-        background: 'rgba(255,255,255,0.06)',
-        border: '1px solid rgba(255,255,255,0.10)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
         padding,
         ...style,
       }}

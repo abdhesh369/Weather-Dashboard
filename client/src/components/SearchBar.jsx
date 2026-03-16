@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Search, LocateFixed, Star } from 'lucide-react';
+import { Search, LocateFixed, Star, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function SearchBar({
@@ -26,16 +26,17 @@ export default function SearchBar({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
 
       {/* Input row */}
-      <form onSubmit={handleSubmit} className="flex gap-2.5 items-center">
+      <form onSubmit={handleSubmit} className="flex gap-3 items-center">
         {/* Search input */}
-        <div className="relative flex-1">
+        <div className="relative flex-1 group">
+          <div className="absolute inset-0 bg-brand-primary/5 rounded-[22px] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
           <Search
-            size={16}
-            className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200"
-            style={{ color: focused ? 'var(--brand-primary)' : 'var(--text-muted)' }}
+            size={18}
+            className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300"
+            style={{ color: focused ? 'var(--brand-primary)' : 'rgba(255,255,255,0.3)' }}
           />
           <input
             ref={inputRef}
@@ -45,16 +46,25 @@ export default function SearchBar({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="Search city, airport or ZIP…"
-            className="w-full py-3.5 pl-11 pr-4 text-[15px] rounded-[20px] transition-all duration-250 bg-white/5 border border-white/10 text-white placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10"
+            className="glass w-full h-[56px] pl-12 pr-12 text-[15px] rounded-[22px] transition-all duration-300 text-white placeholder:text-white/30 outline-none focus:border-brand-primary/40 focus:bg-white/5"
           />
+          {value && (
+            <button
+              type="button"
+              onClick={() => { setValue(''); inputRef.current?.focus(); }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all cursor-pointer border-none"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         {/* Search button */}
         <motion.button
           type="submit"
           whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="px-6 py-3.5 rounded-[20px] text-[15px] font-semibold text-white bg-brand-primary hover:bg-brand-primary-hover transition-colors border-none cursor-pointer"
+          whileTap={{ scale: 0.98 }}
+          className="h-[56px] px-8 rounded-[22px] text-[15px] font-bold text-white bg-brand-primary shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/40 transition-all border-none cursor-pointer shrink-0"
         >
           Search
         </motion.button>
@@ -63,12 +73,12 @@ export default function SearchBar({
         <motion.button
           type="button"
           onClick={onLocate}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.05, rotate: 5 }}
           whileTap={{ scale: 0.95 }}
           title="Use my location"
-          className="w-[52px] h-[52px] rounded-[20px] flex items-center justify-center bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white cursor-pointer transition-all duration-200"
+          className="glass w-[56px] h-[56px] rounded-[22px] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all duration-300"
         >
-          <LocateFixed size={18} />
+          <LocateFixed size={20} />
         </motion.button>
       </form>
 

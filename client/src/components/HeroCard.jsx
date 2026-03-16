@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ToastContext } from '../App';
 import api from '../lib/api';
 import { convertTemp, convertWind } from '../utils/converters';
+import WeatherParticles from './ui/WeatherParticles';
 
 const GRADIENTS = {
   clear:        'linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #0369a1 100%)',
@@ -64,93 +65,113 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
   const metaChips = [
     { icon: '💧', label: `${current.humidity}%`,                  sub: 'Humidity' },
     { icon: '💨', label: convertWind(current.windSpeed, units),    sub: 'Wind' },
-    { icon: '🌡', label: `${convertTemp(current.feelsLike, units)}${unitLabel}`, sub: 'Feels like' },
-    { icon: '👁', label: '10 km',                                  sub: 'Visibility' },
+    { icon: '🌡', label: `${convertTemp(current.feelsLike, units)}${unitLabel}`, sub: 'Feels' },
   ];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
-      className="relative overflow-hidden rounded-[28px] p-8"
-      style={{ border: '1px solid rgba(255,255,255,0.10)', minHeight: 260 }}
+       initial={{ opacity: 0, scale: 0.98 }}
+       animate={{ opacity: 1, scale: 1 }}
+       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+       className="glass relative overflow-hidden rounded-[32px] p-10 md:p-12 group"
+       style={{ minHeight: 320 }}
     >
-      <div className="absolute inset-0 transition-all duration-700" style={{ background: gradient, opacity: 0.6 }} />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(0,0,0,0.28) 0%,transparent 60%)' }} />
+      {/* Immersive Background */}
+      <div className="absolute inset-0 transition-transform duration-1000 group-hover:scale-105" 
+           style={{ background: gradient, opacity: 0.7 }} />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-transparent" />
+      
+      <div className="absolute inset-0 opacity-20 pointer-events-none" 
+           style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(0,0,0,0.2) 100%)' }} />
 
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin size={14} style={{ color: 'rgba(255,255,255,0.5)' }} />
-              <span className="text-[22px] font-bold text-white leading-none">{current.city}</span>
-              <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>{current.country}</span>
-            </div>
+      <WeatherParticles condition={current.condition} />
 
-            <motion.div
-              key={String(current.temperature) + units}
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 180, damping: 14 }}
-              className="text-white leading-none font-light"
-              style={{ fontSize: 'clamp(64px, 10vw, 84px)', letterSpacing: '-3px' }}
+      <div className="relative z-10 flex flex-col h-full justify-between gap-8">
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <motion.div 
+               initial={{ x: -10, opacity: 0 }}
+               animate={{ x: 0, opacity: 1 }}
+               className="flex items-center gap-2 mb-4 bg-black/20 backdrop-blur-md w-fit px-4 py-1.5 rounded-full border border-white/10"
             >
-              {convertTemp(current.temperature, units)}
-              <sup style={{ fontSize: 28, fontWeight: 400, letterSpacing: 0, verticalAlign: 'super' }}>
-                {unitLabel}
-              </sup>
+              <MapPin size={12} className="text-white/60" />
+              <span className="text-[14px] font-semibold text-white tracking-wide uppercase">
+                {current.city}, {current.country}
+              </span>
             </motion.div>
 
-            <div className="flex items-center gap-3 mt-2.5 flex-wrap">
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium capitalize"
-                style={{ background: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.92)' }}
+            <div className="flex items-center gap-6">
+              <motion.div
+                key={String(current.temperature) + units}
+                initial={{ opacity: 0, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, filter: 'blur(0px)' }}
+                className="text-white leading-none font-bold tracking-tight"
+                style={{ fontSize: 'clamp(64px, 8vw, 84px)' }}
               >
-                {emoji} {current.description}
-              </span>
-              {today && (
-                <span className="flex items-center gap-2 text-[14px] font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  <span className="flex items-center gap-0.5 text-white">
-                    <ArrowUp size={12} style={{ color: '#f87171' }} />{convertTemp(today.tempHigh, units)}°
-                  </span>
-                  <span className="flex items-center gap-0.5" style={{ opacity: 0.55 }}>
-                    <ArrowDown size={12} style={{ color: '#60a5fa' }} />{convertTemp(today.tempLow, units)}°
-                  </span>
+                {convertTemp(current.temperature, units)}
+                <span className="text-[20px] font-medium opacity-60 ml-1 align-top mt-2 inline-block">
+                  {unitLabel}
                 </span>
-              )}
+              </motion.div>
+              
+              <div className="h-20 w-[1px] bg-white/10 hidden md:block" />
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[20px] md:text-[24px] font-semibold text-white capitalize leading-tight">
+                   {current.description}
+                </span>
+                {today && (
+                  <div className="flex items-center gap-3 text-[15px] font-medium text-white/70">
+                    <span className="flex items-center gap-1">
+                      <ArrowUp size={14} className="text-rose-400" />{convertTemp(today.tempHigh, units)}°
+                    </span>
+                    <span className="flex items-center gap-1 opacity-60">
+                      <ArrowDown size={14} className="text-blue-400" />{convertTemp(today.tempLow, units)}°
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <span style={{ fontSize: 72, lineHeight: 1, filter: 'drop-shadow(0 4px 14px rgba(255,255,255,0.12))' }}>{emoji}</span>
-            <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <div className="flex flex-col items-end gap-2">
+            <motion.span 
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              style={{ fontSize: 72, filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.3))' }}
+            >
+              {emoji}
+            </motion.span>
+            <span className="text-[14px] font-medium text-white/50 tracking-wider uppercase">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-6">
-          {metaChips.map(chip => (
-            <div key={chip.sub} className="flex items-center gap-1.5 px-3.5 py-2 rounded-[12px] text-[13px]"
-              style={{ background: 'rgba(0,0,0,0.22)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.82)' }}>
-              <span style={{ fontSize: 14 }}>{chip.icon}</span>
-              <span className="font-semibold">{chip.label}</span>
-              <span style={{ color: 'rgba(255,255,255,0.42)', fontSize: 11 }}>{chip.sub}</span>
-            </div>
-          ))}
-        </div>
+        <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-white/10">
+          <div className="flex flex-wrap gap-4">
+            {metaChips.map(chip => (
+              <div key={chip.sub} className="flex flex-col gap-0.5">
+                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">{chip.sub}</span>
+                <div className="flex items-center gap-1.5 font-bold text-white text-[16px]">
+                  <span>{chip.icon}</span>
+                  {chip.label}
+                </div>
+              </div>
+            ))}
+          </div>
 
-        <div className="flex flex-wrap gap-2 mt-4">
-          <ActionButton variant="primary" onClick={() => { localStorage.setItem('defaultCity', current.city); addToast(`${current.city} set as default`, 'success'); }}>
-            <Bookmark size={13} /> Set default
-          </ActionButton>
-          <ActionButton variant="fav" onClick={handleSave} disabled={saving}>
-            <Star size={13} /> {saving ? 'Saving…' : 'Save'}
-          </ActionButton>
-          <ActionButton variant="ghost" onClick={handleShare}>
-            <Share2 size={13} /> Share
-          </ActionButton>
+          <div className="flex flex-wrap gap-2">
+            <ActionButton variant="primary" onClick={() => { localStorage.setItem('defaultCity', current.city); addToast(`${current.city} set as default`, 'success'); }}>
+              <Bookmark size={13} />
+            </ActionButton>
+            <ActionButton variant="fav" onClick={handleSave} disabled={saving}>
+              <Star size={13} />
+            </ActionButton>
+            <ActionButton variant="ghost" onClick={handleShare}>
+              <Share2 size={13} />
+            </ActionButton>
+          </div>
         </div>
       </div>
     </motion.div>

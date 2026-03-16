@@ -1,4 +1,3 @@
-import { createClient } from 'redis';
 // NOTE: Using ioredis for the exported `redis` instance (used by rate-limit-redis)
 // and a simple async cache for weather data
 

@@ -1,0 +1,14 @@
+FAIL tests/weather.test.js
+  ΓùÅ Test suite failed to run
+
+    Cannot find module 'redis' from 'cache.js'
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/index.js:863:11)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        0.364 s
+Ran all test suites matching tests/weather.test.js.
+(node:2560) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

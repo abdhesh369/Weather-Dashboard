@@ -12,10 +12,9 @@ function InputField({ type, id, name, placeholder, value, onChange, icon: Icon, 
       <input
         type={showToggle ? (showPass ? 'text' : 'password') : type}
         id={id} name={name} placeholder={placeholder} value={value} onChange={onChange} required
-        className="w-full py-3.5 pl-11 pr-4 rounded-[14px] text-[15px] text-white outline-none transition-all duration-200"
-        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)' }}
-        onFocus={e => { e.target.style.background = 'rgba(255,255,255,0.10)'; e.target.style.borderColor = '#8b5cf6'; e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.15)'; }}
-        onBlur={e => { e.target.style.background = 'rgba(255,255,255,0.07)'; e.target.style.borderColor = 'rgba(255,255,255,0.10)'; e.target.style.boxShadow = 'none'; }}
+        className="w-full py-4 pl-12 pr-4 rounded-[18px] text-[15px] text-white outline-none transition-all duration-300 glass border-white/5 focus:border-purple-500/50 focus:bg-white/10"
+        onFocus={e => { e.target.style.boxShadow = '0 0 0 4px rgba(139,92,246,0.15)'; }}
+        onBlur={e => { e.target.style.boxShadow = 'none'; }}
       />
       {showToggle && (
         <button type="button" onClick={onToggle} className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent cursor-pointer p-0" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -58,8 +57,9 @@ export default function RegisterPage() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-[420px]"
       >
-        <div className="p-8 rounded-[28px]"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(20px)' }}>
+        <div className="glass p-10 rounded-[32px] relative overflow-hidden">
+          {/* Subtle glow effect */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 blur-[80px] rounded-full" />
 
           {/* Header */}
           <div className="text-center mb-8">

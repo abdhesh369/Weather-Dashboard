@@ -1,14 +1,14 @@
 export default function PageLayout({ left, right, fullWidth, children }) {
   if (fullWidth || children) {
     return (
-      <div className="max-w-[1140px] mx-auto px-5 py-8">
+      <div className="max-w-[1100px] mx-auto px-5 py-8">
         {children}
       </div>
     );
   }
 
   return (
-    <div className="max-w-[1140px] mx-auto px-5 py-8">
+    <div className="max-w-[1100px] mx-auto px-5 py-8">
       <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}
         // Responsive handled below via a style tag in index.css
       >

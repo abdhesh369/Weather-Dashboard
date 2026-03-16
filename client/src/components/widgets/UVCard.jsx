@@ -8,12 +8,9 @@ export default function UVCard({ uv = 0 }) {
   const pct   = Math.min((idx / 11) * 100, 95);
 
   return (
-    <div
-      className="p-5 rounded-[24px] flex flex-col gap-3"
-      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
-    >
-      <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: 'rgba(255,255,255,0.38)' }}>
-        UV index
+    <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
+      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+        UV Index
       </p>
 
       <div className="flex items-baseline gap-2">
