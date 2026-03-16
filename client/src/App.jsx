@@ -1,164 +1,210 @@
-// client/src/App.jsx
+import React, { useState, useEffect, createContext } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
-import React, { useState, useEffect, useMemo, createContext } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+// Hooks
 import { useWeather } from './hooks/useWeather';
 import { useToast } from './hooks/useToast';
-import { ToastContainer } from './components/ToastContainer';
+import { useWeatherBackground } from './hooks/useWeatherBackground';
+import { AuthContext } from './context/AuthContext';
+import api from './lib/api';
 
+// Components
 import Navbar from './components/Navbar';
-import SearchForm from './components/SearchForm';
-import PremiumDashboard from './components/PremiumDashboard';
-import { convertTemp, convertWind } from './utils/converters';
+import PageLayout from './components/layout/PageLayout';
+import SearchBar from './components/SearchBar';
+import HeroCard from './components/HeroCard';
+import StatsGrid from './components/StatsGrid';
+import HourlyForecast from './components/HourlyForecast';
+import DailyForecast from './components/DailyForecast';
+import WeatherChart from './components/WeatherChart';
 import FavoritesList from './components/FavoritesList';
+import { ToastContainer } from './components/ToastContainer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import UnitToggle from './components/UnitToggle';
+import { convertTemp } from './utils/converters';
 
-import './App.css';
 
+// Contexts
 export const ToastContext = createContext(null);
 
-import { LiquidGlassCard } from './components/ui/liquid-weather-glass';
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400">
+          <h2 className="text-lg font-bold mb-2">Something went wrong</h2>
+          <p className="text-sm opacity-80">{this.state.error?.message}</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function App() {
+
   const [units, setUnits] = useState(localStorage.getItem('units') || 'metric');
   const { weatherData, loading, error, searchHistory, fetchWeather, fetchByGeolocation } = useWeather();
   const { toasts, addToast, removeToast } = useToast();
+  const { isAuthenticated, token } = React.useContext(AuthContext);
+
+  const [favorites, setFavorites] = useState([]);
+  const [favLoading, setFavLoading] = useState(false);
+
+  const bgClass = useWeatherBackground(weatherData?.current?.condition);
 
   useEffect(() => {
     localStorage.setItem('units', units);
   }, [units]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchFavorites();
+    } else {
+      setFavorites([]);
+    }
+  }, [isAuthenticated, token]);
 
-
-  const handleSetDefault = (city) => {
-    localStorage.setItem('defaultCity', city);
-    addToast(`${city} set as your default city`, 'success');
+  const fetchFavorites = async () => {
+    setFavLoading(true);
+    try {
+      const response = await api.get('/api/favorites');
+      setFavorites(response.data);
+    } catch (err) {
+      console.error('Error fetching favorites:', err);
+    } finally {
+      setFavLoading(false);
+    }
   };
 
-  const getBackgroundClass = () => {
-    if (!weatherData) return 'bg-default';
-    const condition = weatherData.current.condition.toLowerCase();
-    if (condition.includes('clear')) return 'bg-clear';
-    if (condition.includes('cloud')) return 'bg-clouds';
-    if (condition.includes('rain') || condition.includes('drizzle')) return 'bg-rain';
-    if (condition.includes('snow')) return 'bg-snow';
-    return 'bg-default';
+  const handleAddFavorite = async (city) => {
+    if (!isAuthenticated) {
+      addToast('Please log in to save favorites', 'info');
+      return;
+    }
+    try {
+      const response = await api.post('/api/favorites', { city });
+      setFavorites(response.data);
+      addToast(`${city} added to favorites!`, 'success');
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Failed to add favorite', 'error');
+    }
+  };
+
+  const handleRemoveFavorite = async (city) => {
+    try {
+      const response = await api.delete('/api/favorites', { data: { city } });
+      setFavorites(response.data);
+      addToast(`${city} removed from favorites`, 'success');
+    } catch (err) {
+      addToast('Failed to remove favorite', 'error');
+    }
+  };
+
+  const isFavorite = (cityName) => {
+    if (!weatherData) return false;
+    return favorites.some(fav => fav.toLowerCase().includes(weatherData.current.city.toLowerCase()));
   };
 
   return (
     <ToastContext.Provider value={addToast}>
-      <div className={`app-wrapper transition-all duration-700 ${getBackgroundClass()}`}>
-        <Navbar />
-        <div className="App overflow-hidden">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="dashboard-content"
-                >
-                  <header>
-                    <div className="header-top">
-                      <h1>SkyCast</h1>
-                      <UnitToggle units={units} setUnits={setUnits} />
-                    </div>
-                    <LiquidGlassCard 
-                      className="search-container p-4"
-                      borderRadius="1.5rem"
-                      shadowIntensity="sm"
-                      glowIntensity="none"
-                    >
-                      <SearchForm onSearch={(city) => fetchWeather({ city })} />
-                      <motion.button 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="btn-location" 
-                        onClick={fetchByGeolocation} 
-                        title="Use my current location"
-                      >
-                        Use My Location
-                      </motion.button>
-                    </LiquidGlassCard>
+      <div className={`app-wrapper ${bgClass}`}>
+        <Navbar units={units} setUnits={setUnits} />
+        
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PageLayout
+                left={
+                  <div className="flex flex-col gap-8">
+                    {/* Search Section */}
+                    <SearchBar 
+                      onSearch={(city) => fetchWeather({ city })}
+                      onLocate={fetchByGeolocation}
+                      searchHistory={searchHistory}
+                      favorites={favorites}
+                    />
 
-                    <div className="dashboard-extras">
-                      {searchHistory.length > 0 && (
-                        <div className="search-history-section">
-                          <ul className="history-list">
-                            {searchHistory.map(city => (
-                              <li
-                                key={city}
-                                className="history-item"
-                                role="button"
-                                tabIndex={0}
-                                onClick={() => fetchWeather({ city })}
-                                onKeyDown={(e) => e.key === 'Enter' && fetchWeather({ city })}
-                              >
-                                {city}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      <FavoritesList onCityClick={(city) => fetchWeather({ city })} />
-                    </div>
-                  </header>
-
-                  <main>
+                    {/* Main Content */}
                     <AnimatePresence mode="wait">
                       {loading && (
-                        <LiquidGlassCard 
-                          key="loading"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="loading-container p-8"
-                          borderRadius="1.5rem"
-                        >
-                          <p className="loading-message">Fetching current conditions...</p>
-                        </LiquidGlassCard>
+                        <div className="p-12 text-center text-white/50 animate-pulse">
+                          Fetching current conditions...
+                        </div>
                       )}
                       {error && !loading && (
-                        <LiquidGlassCard 
-                          key="error"
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 20 }}
-                          className="error-container p-8"
-                          borderRadius="1.5rem"
-                        >
-                          <p className="error-message">{error}</p>
-                        </LiquidGlassCard>
+                        <div className="p-8 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-center">
+                          {error}
+                        </div>
                       )}
                       {weatherData && !loading && !error && (
-                        <motion.div 
-                          key="weather-grid"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="premium-dashboard-wrapper w-full"
-                        >
-                          <PremiumDashboard 
-                            weatherData={weatherData}
-                            convertTemp={(t) => convertTemp(t, units)}
-                            units={units}
-                          />
-                        </motion.div>
+                        <ErrorBoundary>
+                          <div className="anim-fade-up flex flex-col gap-6">
+                            <HeroCard 
+                              weatherData={weatherData}
+                              units={units}
+                              onAddFavorite={handleAddFavorite}
+                              isFavorite={isFavorite(weatherData.current.city)}
+                            />
+
+                            <HourlyForecast 
+                              hourlyData={weatherData.forecast?.hourly} 
+                              units={units} 
+                            />
+
+                            <WeatherChart 
+                              data={weatherData.forecast?.daily?.map(d => ({
+                                name: d.day,
+                                temperature: convertTemp(d.tempHigh, units)
+                              }))} 
+                            />
+
+                            <StatsGrid 
+                              weatherData={weatherData} 
+                              units={units} 
+                            />
+
+                          </div>
+                        </ErrorBoundary>
                       )}
                     </AnimatePresence>
-                  </main>
-                </motion.div>
-              }
-            />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Routes>
-        </div>
+
+                  </div>
+                }
+                right={
+                  <div className="flex flex-col gap-6">
+                    {weatherData && (
+                      <DailyForecast 
+                        dailyData={weatherData.forecast?.daily} 
+                        units={units} 
+                      />
+                    )}
+                    <FavoritesList 
+                      favorites={favorites} 
+                      loading={favLoading}
+                      onCityClick={(city) => fetchWeather({ city })}
+                      onRemoveFavorite={handleRemoveFavorite}
+                    />
+                  </div>
+                }
+              />
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
       </div>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>

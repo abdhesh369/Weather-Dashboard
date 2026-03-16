@@ -1,3 +1,4 @@
+import { describe, test, expect } from '@jest/globals';
 import { processForecast } from '../controllers/weatherController.js';
 
 describe('Weather Data Processing', () => {
@@ -11,10 +12,13 @@ describe('Weather Data Processing', () => {
     
     const result = processForecast(mockDataList);
     
-    // Result should be grouped by date
-    expect(result.length).toBeGreaterThan(0);
-    expect(result[0]).toHaveProperty('tempHigh');
-    expect(result[0]).toHaveProperty('tempLow');
-    expect(result[0]).toHaveProperty('day');
+    // Result should be grouped by date in the daily property
+    expect(result.daily.length).toBeGreaterThan(0);
+    expect(result.daily[0]).toHaveProperty('tempHigh');
+    expect(result.daily[0]).toHaveProperty('tempLow');
+    expect(result.daily[0]).toHaveProperty('day');
+    
+    // Result should also have hourly data
+    expect(result.hourly.length).toBeGreaterThan(0);
   });
 });

@@ -1,81 +1,53 @@
-import React, { useState, useEffect, useContext } from 'react';
-import api from '../lib/api';
-import { AuthContext } from '../context/AuthContext';
-import { ToastContext } from '../App';
+import { Trash2 } from 'lucide-react';
 
-function FavoritesList({ onCityClick }) {
-    const [favorites, setFavorites] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const { isAuthenticated, token } = useContext(AuthContext);
-    const addToast = useContext(ToastContext);
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchFavorites();
-        }
-    }, [isAuthenticated, token]);
-
-    const fetchFavorites = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('/api/favorites');
-            setFavorites(response.data);
-        } catch (err) {
-            console.error('Error fetching favorites:', err);
-            setError('Failed to load favorites');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleRemoveFavorite = async (city, e) => {
-        e.stopPropagation();
-        try {
-            const response = await api.delete('/api/favorites', {
-                data: { city }
-            });
-            setFavorites(response.data);
-            addToast(`${city} removed from favorites`, 'success');
-        } catch (err) {
-            console.error('Error removing favorite:', err);
-            addToast('Failed to remove favorite', 'error');
-        }
-    };
-
-    if (!isAuthenticated) return null;
-
+/**
+ * Controlled favorites list component.
+ */
+function FavoritesList({ favorites = [], loading, onCityClick, onRemoveFavorite }) {
+  if (favorites.length === 0 && !loading) {
     return (
-        <div className="favorites-list">
-            <h3>Your Favorite Cities</h3>
-            {loading && <p>Loading favorites...</p>}
-            {error && <p className="error-message">{error}</p>}
-            {!loading && favorites.length === 0 && <p>No favorite cities added yet.</p>}
-            <ul className="history-list">
-                {favorites.map((city) => (
-                    <li
-                        key={city}
-                        role="button"
-                        tabIndex={0}
-                        className="history-item favorite-item"
-                        onClick={() => onCityClick(city)}
-                        onKeyDown={(e) => e.key === 'Enter' && onCityClick(city)}
-                    >
-                        {city}
-                        <button
-                            className="btn-remove-favorite"
-                            onClick={(e) => handleRemoveFavorite(city, e)}
-                            aria-label={`Remove ${city} from favorites`}
-                            title="Remove from favorites"
-                        >
-                            ×
-                        </button>
-                    </li>
-                ))}
-            </ul>
-        </div>
+      <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
+        <p className="text-sm text-white/40">No favorite cities yet.</p>
+      </div>
     );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h3 className="text-xs font-bold uppercase tracking-widest text-white/30 ml-1">
+        Your Favorites
+      </h3>
+      
+      <div className="flex flex-col gap-2">
+        {loading && <div className="p-4 text-center text-white/30 animate-pulse">Loading...</div>}
+        
+        {favorites.map((city) => (
+          <div
+            key={city}
+            onClick={() => onCityClick(city)}
+            className="group flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-brand-primary/30 transition-all cursor-pointer"
+          >
+            <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">
+              {city}
+            </span>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveFavorite(city);
+              }}
+              className="p-2 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-red-400 transition-all"
+              title="Remove from favorites"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default FavoritesList;
+
 

@@ -1,7 +1,7 @@
+import 'dotenv/config';
 import * as Sentry from '@sentry/node';
 import connectDB from './db.js';
 import express from 'express';
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
@@ -14,11 +14,12 @@ import authRoutes from './routes/auth.js';
 import favoritesRoutes from './routes/favorites.js';
 import userRoutes from './routes/user.js';
 import weatherRoutes from './routes/weather.js';
+import { RedisStore } from 'rate-limit-redis';
+import { redis } from './cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
 
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET', 'WEATHER_API_KEY'];
 for (const key of REQUIRED_ENV) {
@@ -56,8 +57,17 @@ app.use(helmet({
   },
 }));
 
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || '').split(',');
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin === 'http://localhost:5173') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
@@ -70,19 +80,27 @@ app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
+
+
 // Rate Limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  limit: 100, // Limit each IP to 100 requests per window
   message: { message: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  store: new RedisStore({
+    sendCommand: (...args) => redis.call(...args),
+  }),
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  limit: 20,
   message: { message: 'Too many login attempts, please try again later.' },
+  store: new RedisStore({
+    sendCommand: (...args) => redis.call(...args),
+  }),
 });
 
 // Routes
@@ -95,7 +113,7 @@ app.use('/api/weather', apiLimiter, weatherRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/user', userRoutes);
 
-app.use(Sentry.Handlers.errorHandler());
+Sentry.setupExpressErrorHandler(app);
 
 // Serve Static Assets in Production
 if (process.env.NODE_ENV === 'production') {

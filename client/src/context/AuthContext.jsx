@@ -66,7 +66,13 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={contextValue}>
-      {!isLoading && children}
+      {isLoading ? (
+        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0c] text-white/50 animate-pulse font-medium">
+          Initializing SkyCast...
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

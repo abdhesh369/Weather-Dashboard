@@ -1,6 +1,6 @@
 import { Redis } from 'ioredis';
 
-const redis = new Redis(process.env.REDIS_URL);
+export const redis = new Redis(process.env.REDIS_URL);
 
 redis.on('error', (err) => {
   console.warn('[Cache] Redis connection error:', err.message);
