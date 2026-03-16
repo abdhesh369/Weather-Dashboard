@@ -17,16 +17,18 @@ export const extractCurrentConditions = (data) => ({
   temperature: data.main.temp,
   feelsLike: data.main.feels_like,
   humidity: data.main.humidity,
+  pressure: data.main.pressure,
   windSpeed: data.wind.speed,
+  windDeg: data.wind.deg,
   condition: data.weather[0].main,
   description: data.weather[0].description,
   icon: data.weather[0].icon,
+  coord: data.coord,
 });
 
 export const processForecast = (forecastList) => {
   const dailyMap = {};
   for (const item of forecastList) {
-    // FIXED: Use YYYY-MM-DD for locale-independent grouping
     const date = new Date(item.dt * 1000).toISOString().split('T')[0];
     
     if (!dailyMap[date]) {
@@ -35,11 +37,13 @@ export const processForecast = (forecastList) => {
         temps: [],
         icons: new Set(),
         conditions: new Set(),
+        pop: 0,
       };
     }
     dailyMap[date].temps.push(item.main.temp);
     dailyMap[date].icons.add(item.weather[0].icon);
     dailyMap[date].conditions.add(item.weather[0].main);
+    dailyMap[date].pop = Math.max(dailyMap[date].pop, item.pop || 0);
   }
   
   return {
@@ -49,14 +53,15 @@ export const processForecast = (forecastList) => {
       tempLow: Math.min(...d.temps),
       icon: d.icons.values().next().value,
       condition: d.conditions.values().next().value,
+      pop: Math.round(d.pop * 100),
     })).slice(0, 5),
-    hourly: forecastList.slice(0, 6).map((item) => {
-      // Return the next 18 hours (6 * 3-hour intervals)
+    hourly: forecastList.slice(0, 8).map((item) => {
       return {
         time: new Date(item.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         temp: item.main.temp,
         condition: item.weather[0].main,
         icon: item.weather[0].icon,
+        pop: Math.round((item.pop || 0) * 100),
       };
     })
   };
@@ -78,14 +83,21 @@ export const getWeatherData = async (req, res) => {
     const cached = await getCached(cacheKey);
     if (cached) return res.json(cached);
 
+    // Initial weather & forecast fetch
     const [currentRes, forecastRes] = await Promise.all([
       axios.get(buildWeatherUrl('https://api.openweathermap.org/data/2.5/weather', params)),
       axios.get(buildWeatherUrl('https://api.openweathermap.org/data/2.5/forecast', params)),
     ]);
 
+    const coords = currentRes.data.coord;
+    
+    // Fetch AQI using coordinates from the first response
+    const aqiRes = await axios.get(buildWeatherUrl('https://api.openweathermap.org/data/2.5/air_pollution', { lat: coords.lat, lon: coords.lon }));
+
     const result = {
       current: extractCurrentConditions(currentRes.data),
       forecast: processForecast(forecastRes.data.list),
+      aqi: aqiRes.data.list[0],
     };
 
     await setCached(cacheKey, result);

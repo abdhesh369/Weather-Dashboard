@@ -12,6 +12,8 @@ function getEmoji(condition = '') {
   return '🌤️';
 }
 
+import TiltCard from './ui/TiltCard';
+
 export default function DailyForecast({ dailyData = [], units }) {
   const allLo = dailyData.map(d => convertTemp(d.tempLow,  units));
   const allHi = dailyData.map(d => convertTemp(d.tempHigh, units));
@@ -20,7 +22,8 @@ export default function DailyForecast({ dailyData = [], units }) {
   const range = Math.max(maxT - minT, 1);
 
   return (
-    <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
+    <TiltCard>
+      <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
       <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
         7-day forecast
       </p>
@@ -75,5 +78,6 @@ export default function DailyForecast({ dailyData = [], units }) {
         })}
       </div>
     </div>
-  );
+  </TiltCard>
+);
 }

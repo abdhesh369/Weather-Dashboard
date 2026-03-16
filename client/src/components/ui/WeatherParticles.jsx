@@ -18,34 +18,29 @@ export default function WeatherParticles({ condition = 'clear', intensity = 20 }
       arr.push({
         id: i,
         left: `${Math.random() * 100}%`,
-        delay: Math.random() * 5,
-        duration: 1.5 + Math.random() * 2,
-        opacity: 0.1 + Math.random() * 0.4,
-        size: 1 + Math.random() * 3,
+        top: `${Math.random() * 100}%`,
+        delay: -Math.random() * 10, // Negative delay to start mid-animation
+        duration: 0.8 + Math.random() * 1.5,
+        opacity: 0.1 + Math.random() * 0.3,
+        size: 1 + Math.random() * 2,
       });
     }
     return arr;
-  }, [intensity, condition]);
+  }, [intensity]); // Remove condition from dependency to avoid flicker on rerender if intensity is same
 
   if (c.includes('rain') || c.includes('drizzle')) {
     return (
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         {particles.map((p) => (
-          <motion.div
+          <div
             key={p.id}
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: '110vh', opacity: p.opacity }}
-            transition={{
-              duration: p.duration * 0.5,
-              repeat: Infinity,
-              delay: p.delay,
-              ease: "linear"
-            }}
-            className="absolute bg-blue-300/40 w-[1px]"
+            className="absolute bg-blue-300/40 w-[1px] weather-rain"
             style={{
               left: p.left,
-              height: `${20 + Math.random() * 30}px`,
-              transform: 'rotate(15deg)',
+              height: `${25 + Math.random() * 20}px`,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+              opacity: p.opacity,
             }}
           />
         ))}
@@ -57,24 +52,16 @@ export default function WeatherParticles({ condition = 'clear', intensity = 20 }
     return (
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         {particles.map((p) => (
-          <motion.div
+          <div
             key={p.id}
-            initial={{ y: -20, opacity: 0, x: 0 }}
-            animate={{ 
-              y: '110vh', 
-              opacity: p.opacity,
-              x: [0, 20, -20, 0]
-            }}
-            transition={{
-              y: { duration: p.duration * 2, repeat: Infinity, delay: p.delay, ease: "linear" },
-              x: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-              opacity: { duration: 1 }
-            }}
-            className="absolute bg-white/60 rounded-full blur-[1px]"
+            className="absolute bg-white/60 rounded-full blur-[1px] weather-snow"
             style={{
               left: p.left,
               width: `${p.size}px`,
               height: `${p.size}px`,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration * 3}s`,
+              opacity: p.opacity,
             }}
           />
         ))}
@@ -85,21 +72,32 @@ export default function WeatherParticles({ condition = 'clear', intensity = 20 }
   if (c.includes('cloud') || c.includes('mist') || c.includes('fog')) {
     return (
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {[1, 2, 3].map((i) => (
-          <motion.div
+        {[1, 2, 3, 4].map((i) => (
+          <div
             key={i}
-            initial={{ x: '-100%', opacity: 0 }}
-            animate={{ x: '100%', opacity: 0.05 }}
-            transition={{
-              duration: 20 + i * 10,
-              repeat: Infinity,
-              delay: i * 5,
-              ease: "linear"
+            className="absolute w-[180%] h-[40%] bg-white/5 blur-[80px] rounded-[100%]"
+            style={{ 
+              top: `${(i - 1) * 25}%`,
+              left: '-40%',
+              animation: `float ${15 + i * 5}s ease-in-out infinite`,
+              animationDelay: `${-i * 2}s`
             }}
-            className="absolute w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent blur-[60px]"
-            style={{ top: `${(i - 1) * 30}%` }}
           />
         ))}
+      </div>
+    );
+  }
+
+  if (c.includes('clear')) {
+    return (
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div 
+          className="absolute -top-20 -right-20 w-80 h-80 bg-amber-200/10 blur-[100px] rounded-full weather-sun-ray"
+        />
+        <div 
+          className="absolute top-10 right-10 w-40 h-40 bg-amber-400/5 blur-[60px] rounded-full weather-sun-ray"
+          style={{ animationDelay: '-4s' }}
+        />
       </div>
     );
   }

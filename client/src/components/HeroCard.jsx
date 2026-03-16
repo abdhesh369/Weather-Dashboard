@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { MapPin, Star, Share2, Bookmark, ArrowUp, ArrowDown } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { ToastContext } from '../App';
@@ -68,13 +68,45 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
     { icon: '🌡', label: `${convertTemp(current.feelsLike, units)}${unitLabel}`, sub: 'Feels' },
   ];
 
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['5deg', '-5deg']);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-5deg', '5deg']);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = (mouseX / width) - 0.5;
+    const yPct = (mouseY / height) - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   return (
     <motion.div
        initial={{ opacity: 0, scale: 0.98 }}
        animate={{ opacity: 1, scale: 1 }}
+       onMouseMove={handleMouseMove}
+       onMouseLeave={handleMouseLeave}
        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
        className="glass relative overflow-hidden rounded-[32px] p-10 md:p-12 group"
-       style={{ minHeight: 320 }}
+       style={{ 
+         minHeight: 320,
+         rotateX,
+         rotateY,
+         transformStyle: 'preserve-3d',
+         perspective: 1000
+       }}
     >
       {/* Immersive Background */}
       <div className="absolute inset-0 transition-transform duration-1000 group-hover:scale-105" 
@@ -112,6 +144,16 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
                 <span className="text-[20px] font-medium opacity-60 ml-1 align-top mt-2 inline-block">
                   {unitLabel}
                 </span>
+                <div 
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ml-4 align-middle"
+                  style={{ 
+                    background: current.feelsLike > current.temperature ? 'rgba(244,63,94,0.15)' : 'rgba(56,189,248,0.15)',
+                    color: current.feelsLike > current.temperature ? '#fb7185' : '#38bdf8',
+                    border: `1px solid ${current.feelsLike > current.temperature ? 'rgba(244,63,94,0.2)' : 'rgba(56,189,248,0.2)'}`
+                  }}
+                >
+                  <span className="opacity-60">Feels like</span> {convertTemp(current.feelsLike, units)}°
+                </div>
               </motion.div>
               
               <div className="h-20 w-[1px] bg-white/10 hidden md:block" />

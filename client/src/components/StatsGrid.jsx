@@ -15,21 +15,47 @@ function StatCard({ label, value, sub, percent, barGradient, delay = 0 }) {
       <p className="text-[26px] font-bold text-white leading-none mb-1 transition-transform duration-300 group-hover:translate-x-1">{value}</p>
       <p className="text-[12px] mb-4 opacity-50 font-medium">{sub}</p>
       
-      <div className="h-1.5 rounded-full overflow-hidden bg-white/5 relative">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: barGradient }}
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(Math.max(percent, 0), 100)}%` }}
-          transition={{ duration: 1, delay: delay + 0.2, ease: [0.16, 1, 0.3, 1] }}
-        />
-        {/* Glow effect on the progress bar */}
-        <div 
-          className="absolute top-0 right-0 h-full w-4 blur-sm opacity-50"
-          style={{ background: 'white' }}
-        />
-      </div>
+      {percent !== undefined ? (
+        <div className="h-1.5 rounded-full overflow-hidden bg-white/5 relative">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: barGradient }}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(Math.max(percent, 0), 100)}%` }}
+            transition={{ duration: 1, delay: delay + 0.2, ease: [0.16, 1, 0.3, 1] }}
+          />
+          <div 
+            className="absolute top-0 right-0 h-full w-4 blur-sm opacity-50"
+            style={{ background: 'white' }}
+          />
+        </div>
+      ) : children}
     </motion.div>
+  );
+}
+
+function WindCompass({ deg = 0 }) {
+  return (
+    <div className="relative w-12 h-12 flex items-center justify-center mx-auto mt-1">
+      <svg viewBox="0 0 100 100" className="w-full h-full opacity-20">
+        <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="2" fill="none" />
+        <path d="M50 5 L50 15 M50 85 L50 95 M5 50 L15 50 M85 50 L95 50" stroke="currentColor" strokeWidth="2" />
+      </svg>
+      <motion.div 
+        className="absolute inset-0 flex items-center justify-center"
+        initial={{ rotate: 0 }}
+        animate={{ rotate: deg }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+      >
+        <svg viewBox="0 0 100 100" className="w-6 h-10 text-brand-primary">
+          <path d="M50 0 L65 40 L50 30 L35 40 Z" fill="currentColor" />
+          <path d="M50 100 L35 60 L50 70 L65 60 Z" fill="currentColor" opacity="0.3" />
+        </svg>
+      </motion.div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm z-10" />
+      </div>
+    </div>
   );
 }
 
@@ -53,8 +79,7 @@ export default function StatsGrid({ weatherData, units }) {
       label: 'Wind',
       value: convertWind(wind, units),
       sub: wind < 5 ? 'Calm' : wind < 15 ? 'Light breeze' : wind < 30 ? 'Moderate' : 'Strong winds',
-      percent: Math.min((wind / 30) * 100, 100),
-      barGradient: 'linear-gradient(90deg,#10b981,#6366f1)',
+      children: <WindCompass deg={current.windDeg} />,
       delay: 0.06,
     },
     {

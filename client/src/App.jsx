@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useWeather } from './hooks/useWeather';
 import { useToast } from './hooks/useToast';
 import { useWeatherBackground } from './hooks/useWeatherBackground';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { AuthContext } from './context/AuthContext';
 import api from './lib/api';
 
@@ -22,10 +23,14 @@ import FavoritesList from './components/FavoritesList';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import SunCard from './components/widgets/SunCard';
 import UVCard from './components/widgets/UVCard';
+import AQICard from './components/widgets/AQICard';
+import AlertsBanner from './components/AlertsBanner';
 import { ToastContainer } from './components/ToastContainer';
+import WidgetErrorBoundary from './components/WidgetErrorBoundary';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFoundPage';
+import MobileBottomTab from './components/layout/MobileBottomTab';
 
 
 export const ToastContext = createContext(null);
@@ -54,11 +59,22 @@ function App() {
 
   const [favorites, setFavorites] = useState([]);
   const [favLoading, setFavLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('weather');
 
   const bgClass = useWeatherBackground(weatherData?.current?.condition);
 
   // Persist unit preference
   useEffect(() => { localStorage.setItem('units', units); }, [units]);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onFocusSearch: () => {
+      const input = document.querySelector('input[placeholder*="Search"]');
+      input?.focus();
+    },
+    onLocate: fetchByGeolocation,
+    onToggleUnits: () => setUnits(u => u === 'metric' ? 'imperial' : 'metric')
+  });
 
   // Fetch favourites when auth changes
   useEffect(() => {
@@ -114,6 +130,7 @@ function App() {
                 left={
                   <div className="flex flex-col gap-5">
                     {/* Search */}
+                    <AlertsBanner />
                     <SearchBar
                       onSearch={city => fetchWeather({ city })}
                       onLocate={fetchByGeolocation}
@@ -208,6 +225,7 @@ function App() {
                         />
                         <SunCard sunrise="6:12" sunset="20:34" />
                         <UVCard uv={weatherData.current?.uvi ?? 4} />
+                        <AQICard aqiData={weatherData.aqi} />
                       </>
                     )}
 

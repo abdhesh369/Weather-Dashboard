@@ -84,6 +84,44 @@ body {
 .anim-fade-in  { animation: fadeIn  0.4s var(--ease-out) forwards; }
 .anim-scale-in { animation: scaleIn 0.5s var(--ease-spring) forwards; }
 .anim-float    { animation: float 4s var(--ease-inout) infinite; }
+
+/* ── Weather Animations ──────────────────────────── */
+@keyframes rain {
+  from { transform: translateY(-100px) rotate(15deg); }
+  to   { transform: translateY(100vh) rotate(15deg); }
+}
+
+@keyframes snow {
+  0%   { transform: translateY(-20px) translateX(0); }
+  25%  { transform: translateY(25vh)  translateX(15px); }
+  50%  { transform: translateY(50vh)  translateX(-15px); }
+  75%  { transform: translateY(75vh)  translateX(15px); }
+  100% { transform: translateY(100vh) translateX(0); }
+}
+
+@keyframes sun-ray {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.15; }
+  50%      { transform: scale(1.1) rotate(2deg); opacity: 0.25; }
+}
+
+.weather-rain { animation: rain linear infinite; }
+.weather-snow { animation: snow linear infinite; }
+.weather-sun-ray { animation: sun-ray 8s ease-in-out infinite; }
+
+/* ── Skeleton shimmer ────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.03) 25%, 
+    rgba(255,255,255,0.08) 50%, 
+    rgba(255,255,255,0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
 /* ── Responsive two-column grid ──────────────────── */
 @media (max-width: 900px) {
   .grid[style*="320px"] { grid-template-columns: 1fr !important; }

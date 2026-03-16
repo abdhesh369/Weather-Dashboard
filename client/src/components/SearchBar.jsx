@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
-import { Search, LocateFixed, Star, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { Search, LocateFixed, Star, X, MapPin } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import api from '../lib/api';
 
 export default function SearchBar({
   onSearch,
@@ -10,14 +11,46 @@ export default function SearchBar({
 }) {
   const [value, setValue] = useState('');
   const [focused, setFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
+
+  // Debounced search
+  useEffect(() => {
+    if (value.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const { data } = await api.get(`/api/weather/geocode?q=${encodeURIComponent(value)}`);
+        setSuggestions(data);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [value]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (value.trim()) {
       onSearch(value.trim());
       setValue('');
+      setSuggestions([]);
     }
+  };
+
+  const handleSuggestionClick = (s) => {
+    onSearch(`${s.name}, ${s.country}`);
+    setValue('');
+    setSuggestions([]);
+    inputRef.current?.blur();
   };
 
   const handleTagClick = (city) => {
@@ -26,7 +59,7 @@ export default function SearchBar({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 relative">
 
       {/* Input row */}
       <form onSubmit={handleSubmit} className="flex gap-3 items-center">
@@ -44,19 +77,54 @@ export default function SearchBar({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            placeholder="Search city, airport or ZIP…"
-            className="glass w-full h-[56px] pl-12 pr-12 text-[15px] rounded-[22px] transition-all duration-300 text-white placeholder:text-white/30 outline-none focus:border-brand-primary/40 focus:bg-white/5"
+            onBlur={() => setTimeout(() => setFocused(false), 200)}
+            placeholder="Search city, airport or ZIP… (Press /)"
+            aria-label="Search for a city"
+            className="glass w-full h-[56px] pl-12 pr-12 text-[15px] rounded-[22px] transition-all duration-300 text-white placeholder:text-white/30 outline-none focus:border-brand-primary/40 focus:bg-white/5 focus-visible:ring-2 focus-visible:ring-brand-primary"
+            autoComplete="off"
           />
           {value && (
             <button
               type="button"
-              onClick={() => { setValue(''); inputRef.current?.focus(); }}
+              onClick={() => { setValue(''); setSuggestions([]); inputRef.current?.focus(); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all cursor-pointer border-none"
             >
               <X size={14} />
             </button>
           )}
+
+          {/* Autocomplete Dropdown */}
+          <AnimatePresence>
+            {focused && suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 right-0 mt-2 p-2 glass rounded-[24px] z-[100] border border-white/10 shadow-2xl overflow-hidden"
+              >
+                {suggestions.map((s, i) => (
+                  <button
+                    key={`${s.name}-${s.country}-${i}`}
+                    type="button"
+                    onClick={() => handleSuggestionClick(s)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-[16px] hover:bg-white/10 text-left transition-colors group border-none cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-primary/20 group-hover:text-brand-primary transition-colors">
+                      <MapPin size={14} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-bold text-white leading-tight">
+                        {s.name}
+                      </span>
+                      <span className="text-[11px] text-white/40 font-medium">
+                        {s.state ? `${s.state}, ` : ''}{s.country}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Search button */}

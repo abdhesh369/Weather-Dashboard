@@ -26,7 +26,31 @@ export function useWeather() {
   const fetchWeather = useCallback(async (params) => {
     if (!params?.city && !(params?.lat && params?.lon)) return;
 
-    setLoading(true);
+    const cacheKey = params.city 
+      ? `weather_cache_${params.city.toLowerCase()}` 
+      : `weather_cache_coords_${params.lat}_${params.lon}`;
+
+    // Try to load from cache first
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        const isExpired = Date.now() - timestamp > 10 * 60 * 1000; // 10 mins
+        if (!isExpired) {
+          setWeatherData(data);
+          // Still fetch in background to refresh, but don't set loading if we have valid cache
+          // (Wait, user wants instant load, but silent refresh is better)
+        }
+      } catch (e) {
+        localStorage.removeItem(cacheKey);
+      }
+    }
+
+    setLoading((prevLoading) => {
+      // If we don't have data, we must show loading
+      // If we do have data (from cache), we don't show loading (silent refresh)
+      return weatherData ? prevLoading : true;
+    });
     setError(null);
 
     try {
@@ -40,6 +64,12 @@ export function useWeather() {
       const response = await api.get(url);
       setWeatherData(response.data);
       addToHistory(response.data.current.city);
+      
+      // Save to cache
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data: response.data,
+        timestamp: Date.now()
+      }));
     } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred. Please try again.');
     } finally {
@@ -63,9 +93,4 @@ export function useWeather() {
     if (defaultCity) {
       fetchWeather({ city: defaultCity });
     }
-    // No silent geolocation on mount — user must click the button
-  }, [fetchWeather]);
-
-  return { weatherData, loading, error, searchHistory, fetchWeather, fetchByGeolocation };
-}
-
+    // No silent
