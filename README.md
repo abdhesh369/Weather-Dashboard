@@ -1,107 +1,141 @@
-# Weather Dashboard
+# SkyCast Weather Dashboard
 
-A full-stack web application built with the MERN stack (MongoDB, Express, React, Node.js) that allows users to search for weather by city, use their current location to view weather data, and save favorite locations. It uses the OpenWeatherMap API to fetch current weather and a 5-day forecast, which is visualized using Recharts.
+A production-ready full-stack MERN weather application with a premium glassmorphic UI.
 
-## Features
+## ✨ Features
 
-- **Current Weather & Forecasts**: View the current weather and a 5-day forecast for any city or your current location.
-- **Interactive Charts**: Visualizes temperature trends using `recharts`.
-- **User Authentication**: Secure user registration and login using JWT and `bcryptjs`.
-- **Favorites Management**: Logged-in users can save and manage their favorite cities for quick access.
-- **Responsive Design**: Built with React and optimized for desktop and mobile viewing.
+- **Real-time weather** — current conditions + 5-day forecast via OpenWeatherMap
+- **Hourly forecast** — 6-slot 18-hour view with rain probability
+- **Interactive charts** — dual high/low temperature trend (Recharts AreaChart)
+- **Dynamic backgrounds** — gradient shifts based on weather condition
+- **Stat cards** — humidity, wind, pressure, visibility with animated progress bars
+- **Sun arc widget** — live SVG arc showing today's sunrise/sunset position
+- **UV index gauge** — colour-banded needle indicator
+- **User auth** — JWT (HttpOnly cookie) + refresh token + CSRF protection
+- **Favourites** — add/remove cities, persisted per account (max 20)
+- **Unit toggle** — metric ↔ imperial, persisted to account
+- **Geolocation** — one-click "use my location"
+- **Skeleton loading** — smooth pulse placeholders while data loads
+- **Toast notifications** — animated success/error/info toasts
 
-## Tech Stack
+## 🏗 Tech Stack
 
-### Frontend
-- React 19 (via Vite)
-- React Router DOM for routing
-- Recharts for data visualization
-- Axios for API requests
-- React Icons
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite 6, TailwindCSS v4, Framer Motion |
+| Backend | Node.js, Express 5, Mongoose |
+| Database | MongoDB (Atlas or local) |
+| Cache | Redis (ioredis) with in-memory fallback |
+| Auth | JWT (access + refresh tokens), bcryptjs, csurf |
+| Security | Helmet.js, express-rate-limit, express-validator |
+| Weather API | OpenWeatherMap (current + forecast) |
 
-### Backend
-- Node.js & Express.js
-- MongoDB & Mongoose for the database
-- JSON Web Tokens (JWT) for authentication
-- bcryptjs for password hashing
-- dotenv for environment variable management
-- OpenWeatherMap API integration
+## 🚀 Quick Start
 
-## Prerequisites
+### Prerequisites
+- Node.js v18+
+- MongoDB (local or Atlas URI)
+- OpenWeatherMap API key — [get one free](https://openweathermap.org/api)
 
-Make sure you have the following installed on your machine:
-- [Node.js](https://nodejs.org/) (v16 or higher recommended)
-- [MongoDB](https://www.mongodb.com/) (Local or Atlas URI)
-- [OpenWeatherMap API Key](https://openweathermap.org/api)
-
-## Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd "Weather Dashboard"
-   ```
-
-2. **Install all dependencies:**
-   The root `package.json` includes scripts to install all client and server dependencies simultaneously.
-   ```bash
-   npm run build
-   # Or install individually: npm run install-client && npm run install-server
-   ```
-
-3. **Environment Setup:**
-   Create a `.env` file in the `server` directory and add the following variables:
-   ```env
-   PORT=5000
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret_key
-   WEATHER_API_KEY=your_openweathermap_api_key
-   NODE_ENV=development
-   ```
-
-## Running the Application
-
-You can run both the client and server concurrently from the root directory:
-
+### 1. Install dependencies
 ```bash
+# From project root
+npm run build   # installs both client and server deps + builds client
+```
+
+### 2. Configure environment
+```bash
+cd server
+cp .env.example .env
+# Edit .env — fill in MONGO_URI, JWT_SECRET, REFRESH_TOKEN_SECRET, WEATHER_API_KEY
+```
+
+### 3. Run in development
+```bash
+# From project root — starts server (port 5000) + client (port 5173) concurrently
 npm run dev
 ```
 
-- Complete application (concurrently): `npm run dev`
-- Frontend only: `npm run client` (Runs Vite dev server on port 5173 by default)
-- Backend only: `npm run server` (Runs Express server on port 5000 by default)
+Open [http://localhost:5173](http://localhost:5173)
 
-## API Endpoints
-
-### Weather (Public)
-- `GET /api/weather?city={cityName}` - Fetch weather by city name.
-- `GET /api/weather/coords?lat={lat}&lon={lon}` - Fetch weather by coordinates.
-
-### Authentication (Public)
-- `POST /api/auth/register` - Create a new user.
-- `POST /api/auth/login` - Authenticate a user and get a JWT.
-
-### Favorites (Protected)
-- `GET /api/favorites` - Get user's favorite locations.
-- `POST /api/favorites` - Add a new location to favorites.
-- `DELETE /api/favorites/:id` - Remove a location from favorites.
-
-## Project Structure
-
-```
-Weather Dashboard/
-├── client/                 # React frontend (Vite)
-│   ├── src/
-│   ├── package.json
-│   └── ...
-├── server/                 # Node/Express backend
-│   ├── routes/             # API routes
-│   ├── index.js            # Entry point
-│   ├── package.json
-│   └── ...
-└── package.json            # Root configuration (concurrently)
+### 4. Run in production
+```bash
+npm run build          # builds client into client/dist
+NODE_ENV=production npm start   # serves API + static files on PORT
 ```
 
-## License
+## 📁 Project Structure
 
-This project is licensed under the ISC License.
+```
+skycast/
+├── client/                   # React frontend (Vite)
+│   └── src/
+│       ├── components/
+│       │   ├── widgets/      # SunCard, UVCard
+│       │   ├── layout/       # PageLayout (two-column grid)
+│       │   ├── HeroCard.jsx  # Main weather card with gradient bg
+│       │   ├── StatsGrid.jsx # 4-col stat cards with progress bars
+│       │   ├── HourlyForecast.jsx
+│       │   ├── DailyForecast.jsx  # Range bars (blue→amber)
+│       │   ├── WeatherChart.jsx   # Dual High/Low area chart
+│       │   ├── FavoritesList.jsx
+│       │   ├── SearchBar.jsx
+│       │   ├── Navbar.jsx
+│       │   └── ToastContainer.jsx
+│       ├── pages/            # LoginPage, RegisterPage, NotFoundPage
+│       ├── context/          # AuthContext
+│       ├── hooks/            # useWeather, useToast, useWeatherBackground
+│       ├── lib/              # api.js (Axios instance + CSRF)
+│       ├── styles/           # tokens.css (design tokens)
+│       └── utils/            # converters.js, weather.js
+│
+└── server/                   # Express API
+    ├── controllers/          # auth, weather, favorites, user
+    ├── middleware/            # authMiddleware, validate
+    ├── models/               # User (Mongoose schema)
+    ├── routes/               # auth, weather, favorites, user
+    ├── cache.js              # Redis + memory fallback
+    └── index.js              # App entry, middleware stack
+```
+
+## 🔑 Environment Variables
+
+See `server/.env.example` for full documentation.
+
+| Variable | Required | Description |
+|---|---|---|
+| `MONGO_URI` | ✅ | MongoDB connection string |
+| `JWT_SECRET` | ✅ | Access token secret (min 32 chars) |
+| `REFRESH_TOKEN_SECRET` | ✅ | Refresh token secret (different from JWT_SECRET) |
+| `WEATHER_API_KEY` | ✅ | OpenWeatherMap API key |
+| `PORT` | | Server port (default: 5000) |
+| `NODE_ENV` | | `development` or `production` |
+| `ALLOWED_ORIGIN` | | CORS origins, comma-separated |
+| `REDIS_URL` | | Redis URL (falls back to memory if absent) |
+| `SENTRY_DSN` | | Sentry project DSN (disabled if absent) |
+
+## 🔌 API Endpoints
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/health` | Public | Health check |
+| `GET` | `/api/csrf-token` | Public | CSRF token |
+| `POST` | `/api/auth/register` | Public | Create account |
+| `POST` | `/api/auth/login` | Public | Sign in |
+| `POST` | `/api/auth/logout` | Public | Sign out |
+| `POST` | `/api/auth/refresh` | Public | Refresh access token |
+| `GET` | `/api/user/me` | 🔒 | Current user profile |
+| `PATCH` | `/api/user/preferences` | 🔒 | Update unit preference |
+| `GET` | `/api/weather?city=` | Public | Weather by city name |
+| `GET` | `/api/weather/coords?lat=&lon=` | Public | Weather by GPS |
+| `GET` | `/api/favorites` | 🔒 | List favourites |
+| `POST` | `/api/favorites` | 🔒 | Add favourite |
+| `DELETE` | `/api/favorites` | 🔒 | Remove favourite |
+
+## 🧪 Tests
+
+```bash
+cd server && npm test
+```
+
+Covers: auth registration/login, weather data processing, forecast parsing.

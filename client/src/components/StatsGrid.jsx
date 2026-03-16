@@ -1,66 +1,78 @@
-import { Wind, Droplets, Sun, Eye, Compass, CloudRain } from 'lucide-react';
-import StatCard from './StatCard';
+import { motion } from 'framer-motion';
 import { convertWind } from '../utils/converters';
+
+function StatCard({ label, value, sub, percent, barGradient, delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay }}
+      className="p-4 rounded-[14px]"
+      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+    >
+      <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5" style={{ color: 'rgba(255,255,255,0.38)' }}>
+        {label}
+      </p>
+      <p className="text-[22px] font-bold text-white leading-none mb-0.5">{value}</p>
+      <p className="text-[11px] mb-2.5" style={{ color: 'rgba(255,255,255,0.38)' }}>{sub}</p>
+      <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: barGradient }}
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(Math.max(percent, 0), 100)}%` }}
+          transition={{ duration: 0.7, delay: delay + 0.15, ease: 'easeOut' }}
+        />
+      </div>
+    </motion.div>
+  );
+}
 
 export default function StatsGrid({ weatherData, units }) {
   const { current } = weatherData;
+  const wind = current.windSpeed;
+  const hum  = current.humidity;
+  const pressure = current.pressure ?? 1013;
+  const vis  = current.visibility ?? 10;
 
-  // Mock data/Placeholders for missing API fields (enhance later if API supports)
   const stats = [
     {
-      icon: <Wind size={20} />,
-      label: 'Wind Speed',
-      value: current.windSpeed,
-      unit: units === 'metric' ? 'm/s' : 'mph',
-      description: 'Direction: Southwest',
-      trend: 'up',
-      trendValue: '+2%'
-    },
-    {
-      icon: <Droplets size={20} />,
       label: 'Humidity',
-      value: current.humidity,
-      unit: '%',
-      description: 'The dew point is 12° right now',
+      value: `${hum}%`,
+      sub: hum < 40 ? 'Low — dry air' : hum < 70 ? 'Comfortable' : 'High — muggy',
+      percent: hum,
+      barGradient: 'linear-gradient(90deg,#3b82f6,#06b6d4)',
+      delay: 0,
     },
     {
-      icon: <Sun size={20} />,
-      label: 'UV Index',
-      value: '4',
-      unit: 'Moderate',
-      description: 'Use sun protection until 4 PM',
-      trendValue: 'Low'
+      label: 'Wind',
+      value: convertWind(wind, units),
+      sub: wind < 5 ? 'Calm' : wind < 15 ? 'Light breeze' : wind < 30 ? 'Moderate' : 'Strong winds',
+      percent: Math.min((wind / 30) * 100, 100),
+      barGradient: 'linear-gradient(90deg,#10b981,#6366f1)',
+      delay: 0.06,
     },
     {
-      icon: <Eye size={20} />,
-      label: 'Visibility',
-      value: '10',
-      unit: 'km',
-      description: 'Perfectly clear view',
-    },
-    {
-      icon: <Compass size={20} />,
       label: 'Pressure',
-      value: '1012',
-      unit: 'hPa',
-      description: 'Falling slowly',
-      trend: 'down',
-      trendValue: '-1.2'
+      value: `${pressure} hPa`,
+      sub: pressure > 1013 ? 'High pressure' : pressure < 1000 ? 'Low pressure' : 'Normal',
+      percent: Math.round(Math.min(Math.max(((pressure - 980) / 60) * 100, 0), 100)),
+      barGradient: 'linear-gradient(90deg,#f59e0b,#ef4444)',
+      delay: 0.12,
     },
     {
-      icon: <CloudRain size={20} />,
-      label: 'Precipitation',
-      value: '0',
-      unit: 'mm',
-      description: '0.2 mm expected in next 24h',
-    }
+      label: 'Visibility',
+      value: `${vis} km`,
+      sub: vis >= 10 ? 'Excellent' : vis >= 5 ? 'Good' : 'Poor',
+      percent: Math.min((vis / 10) * 100, 100),
+      barGradient: 'linear-gradient(90deg,#8b5cf6,#ec4899)',
+      delay: 0.18,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {stats.map((stat, idx) => (
-        <StatCard key={idx} {...stat} />
-      ))}
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+      {stats.map(s => <StatCard key={s.label} {...s} />)}
     </div>
   );
 }

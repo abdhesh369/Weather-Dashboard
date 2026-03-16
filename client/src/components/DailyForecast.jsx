@@ -1,47 +1,79 @@
 import { motion } from 'framer-motion';
-import { getWeatherIcon } from '../utils/weather';
 import { convertTemp } from '../utils/converters';
 
+function getEmoji(condition = '') {
+  const c = condition.toLowerCase();
+  if (c.includes('clear'))   return '☀️';
+  if (c.includes('drizzle')) return '🌦️';
+  if (c.includes('rain'))    return '🌧️';
+  if (c.includes('snow'))    return '❄️';
+  if (c.includes('thunder')) return '⛈️';
+  if (c.includes('cloud'))   return '☁️';
+  return '🌤️';
+}
+
 export default function DailyForecast({ dailyData = [], units }) {
+  const allLo = dailyData.map(d => convertTemp(d.tempLow,  units));
+  const allHi = dailyData.map(d => convertTemp(d.tempHigh, units));
+  const minT  = Math.min(...allLo);
+  const maxT  = Math.max(...allHi);
+  const range = Math.max(maxT - minT, 1);
+
   return (
-    <div 
-      className="p-6 rounded-[28px] flex flex-col gap-6"
-      style={{
-        background: 'rgba(255, 255, 255, 0.04)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        backdropFilter: 'blur(12px)',
-      }}
+    <div
+      className="p-5 rounded-[24px] flex flex-col gap-4"
+      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
     >
-      <h3 className="text-xs font-bold uppercase tracking-widest text-white/30 px-1">
-        5-Day Forecast
-      </h3>
+      <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: 'rgba(255,255,255,0.38)' }}>
+        5-day forecast
+      </p>
 
-      <div className="flex flex-col gap-2">
-        {dailyData.map((day, idx) => {
-          const Icon = getWeatherIcon(day.condition);
+      <div className="flex flex-col">
+        {dailyData.map((day, i) => {
+          const lo = convertTemp(day.tempLow,  units);
+          const hi = convertTemp(day.tempHigh, units);
+          const barLeft  = Math.round(((lo - minT) / range) * 100);
+          const barWidth = Math.max(Math.round(((hi - lo)  / range) * 100), 8);
+
           return (
-            <div 
-              key={idx}
-              className="flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-colors group"
+            <motion.div
+              key={day.day + i}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.06 }}
+              className="flex items-center gap-3 py-[11px]"
+              style={{ borderBottom: i < dailyData.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}
             >
-              <div className="flex items-center gap-4 w-24">
-                <span className="text-sm font-bold text-white/70 group-hover:text-white transition-colors">
-                  {idx === 0 ? 'Today' : day.day}
-                </span>
-              </div>
+              {/* Day */}
+              <span className="text-[14px] font-semibold text-white w-[60px] shrink-0">
+                {i === 0 ? 'Today' : day.day}
+              </span>
 
-              <div className="flex items-center gap-2 flex-1 justify-center">
-                <Icon size={18} className="text-brand-primary/80" />
-                <span className="text-[13px] font-medium text-white/40 group-hover:text-white/60 transition-colors capitalize">
-                  {day.condition}
-                </span>
-              </div>
+              {/* Emoji */}
+              <span style={{ fontSize: 18, flexShrink: 0 }}>{getEmoji(day.condition)}</span>
 
-              <div className="flex items-center gap-3 w-24 justify-end font-bold">
-                <span className="text-sm text-white">{convertTemp(day.tempHigh, units)}°</span>
-                <span className="text-sm text-white/30">{convertTemp(day.tempLow, units)}°</span>
+              {/* Condition */}
+              <span className="text-[12px] flex-1 truncate capitalize" style={{ color: 'rgba(255,255,255,0.42)' }}>
+                {day.condition}
+              </span>
+
+              {/* Lo · bar · Hi */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[13px] font-medium w-8 text-right" style={{ color: 'rgba(255,255,255,0.42)' }}>
+                  {lo}°
+                </span>
+                <div className="relative h-[4px] rounded-full w-[54px] overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                  <motion.div
+                    className="absolute top-0 h-full rounded-full"
+                    style={{ left: `${barLeft}%`, background: 'linear-gradient(90deg,#60a5fa,#f59e0b)' }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${barWidth}%` }}
+                    transition={{ duration: 0.6, delay: 0.2 + i * 0.06 }}
+                  />
+                </div>
+                <span className="text-[14px] font-bold text-white w-8 text-right">{hi}°</span>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

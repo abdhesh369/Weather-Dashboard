@@ -1,83 +1,88 @@
-// client/src/components/WeatherChart.js
-
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Area,
-  AreaChart
+  AreaChart, Area, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
+import { convertTemp } from '../utils/converters';
 
-export default function WeatherChart({ data }) {
+const CustomTooltip = ({ active, payload, label, unitLabel }) => {
+  if (!active || !payload?.length) return null;
   return (
-    <div 
-      className="p-6 rounded-[28px] flex flex-col gap-6"
+    <div
+      className="px-3 py-2.5 rounded-[12px] text-[13px]"
       style={{
-        background: 'rgba(255, 255, 255, 0.04)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        backdropFilter: 'blur(12px)',
+        background: 'rgba(8,12,30,0.95)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(10px)',
       }}
     >
-      <div className="flex justify-between items-center px-1">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-white/30">
-          Temperature Trend
-        </h3>
-      </div>
+      <p className="mb-1.5" style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>{label}</p>
+      {payload.map(p => (
+        <p key={p.name} style={{ color: p.color, fontWeight: 700 }}>
+          {p.name}: {p.value}{unitLabel}
+        </p>
+      ))}
+    </div>
+  );
+};
 
-      <div className="h-[240px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--brand-primary)" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="var(--brand-primary)" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              vertical={false} 
-              stroke="rgba(255,255,255,0.05)" 
-            />
-            <XAxis 
-              dataKey="name" 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 500 }}
-              dy={10}
-            />
-            <YAxis 
-              hide 
-              domain={['auto', 'auto']}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(10, 15, 30, 0.9)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '14px',
-                fontSize: '12px',
-                color: '#fff'
-              }}
-              itemStyle={{ color: 'var(--brand-primary)' }}
-              cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
-            />
-            <Area
-              type="monotone"
-              dataKey="temperature"
-              stroke="var(--brand-primary)"
-              strokeWidth={3}
-              fillOpacity={1}
-              fill="url(#colorTemp)"
-              animationDuration={1500}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+export default function WeatherChart({ data = [], units }) {
+  const unitLabel = units === 'metric' ? '°C' : '°F';
+
+  const chartData = data.map(d => ({
+    name: d.name ?? d.day,
+    High: convertTemp(d.tempHigh ?? d.temperature ?? 0, units),
+    Low:  convertTemp(d.tempLow  ?? (d.temperature ?? 0) - 6, units),
+  }));
+
+  return (
+    <div
+      className="p-5 rounded-[24px] flex flex-col gap-4"
+      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
+    >
+      <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: 'rgba(255,255,255,0.38)' }}>
+        Temperature trend
+      </p>
+
+      <ResponsiveContainer width="100%" height={160}>
+        <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
+          <defs>
+            <linearGradient id="gradHigh" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#f59e0b" stopOpacity={0.28} />
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="gradLow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#60a5fa" stopOpacity={0.22} />
+              <stop offset="100%" stopColor="#60a5fa" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+
+          <CartesianGrid stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" vertical={false} />
+
+          <XAxis
+            dataKey="name"
+            tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11, fontWeight: 500 }}
+            axisLine={false} tickLine={false}
+          />
+          <YAxis
+            tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }}
+            axisLine={false} tickLine={false}
+            tickFormatter={v => `${v}°`}
+          />
+
+          <Tooltip content={<CustomTooltip unitLabel={unitLabel} />} cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }} />
+
+          <Legend
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', paddingTop: 8 }}
+          />
+
+          <Area type="monotone" dataKey="High" stroke="#f59e0b" strokeWidth={2}
+            fill="url(#gradHigh)" dot={{ r: 3, fill: '#f59e0b', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
+          <Area type="monotone" dataKey="Low"  stroke="#60a5fa" strokeWidth={2}
+            fill="url(#gradLow)"  dot={{ r: 3, fill: '#60a5fa', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }
-

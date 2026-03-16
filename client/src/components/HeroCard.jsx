@@ -1,118 +1,173 @@
+import { useContext, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Star, Thermometer, Wind, Droplets, ArrowUp, ArrowDown, Compass } from 'lucide-react';
-import { getWeatherIcon, formatWeatherDate } from '../utils/weather';
+import { MapPin, Star, Share2, Bookmark, ArrowUp, ArrowDown } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { ToastContext } from '../App';
+import api from '../lib/api';
 import { convertTemp, convertWind } from '../utils/converters';
 
-export default function HeroCard({ 
-  weatherData, 
-  units, 
-  onAddFavorite, 
-  isFavorite 
-}) {
+const GRADIENTS = {
+  clear:        'linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #0369a1 100%)',
+  clouds:       'linear-gradient(135deg, #334155 0%, #475569 50%, #64748b 100%)',
+  rain:         'linear-gradient(135deg, #1e3a5f 0%, #1e293b 50%, #0f172a 100%)',
+  drizzle:      'linear-gradient(135deg, #1e3a5f 0%, #1e293b 50%, #0f172a 100%)',
+  snow:         'linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #b8c8da 100%)',
+  thunderstorm: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)',
+  default:      'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+};
+
+const EMOJIS = {
+  clear: '☀️', clouds: '☁️', rain: '🌧️',
+  drizzle: '🌦️', snow: '❄️', thunderstorm: '⛈️', default: '🌤️',
+};
+
+function getConditionKey(condition = '') {
+  const c = condition.toLowerCase();
+  if (c.includes('clear'))   return 'clear';
+  if (c.includes('cloud'))   return 'clouds';
+  if (c.includes('drizzle')) return 'drizzle';
+  if (c.includes('rain'))    return 'rain';
+  if (c.includes('snow'))    return 'snow';
+  if (c.includes('thunder')) return 'thunderstorm';
+  return 'default';
+}
+
+export default function HeroCard({ weatherData, units, onSetDefault }) {
+  const { isAuthenticated } = useContext(AuthContext);
+  const addToast = useContext(ToastContext);
+  const [saving, setSaving] = useState(false);
+
   if (!weatherData?.current) return null;
-  
   const { current, forecast } = weatherData;
+  const today = forecast?.daily?.[0];
+  const condKey = getConditionKey(current.condition);
+  const gradient = GRADIENTS[condKey] ?? GRADIENTS.default;
+  const emoji = EMOJIS[condKey] ?? EMOJIS.default;
   const unitLabel = units === 'metric' ? '°C' : '°F';
-  
-  let Icon = Cloud;
-  try {
-    Icon = getWeatherIcon(current.condition) || Cloud;
-  } catch (e) {
-    console.warn('Icon mapping failed', e);
-  }
 
-  const now = new Date();
+  const handleSave = async () => {
+    if (!isAuthenticated) { addToast('Sign in to save favourites', 'info'); return; }
+    setSaving(true);
+    try {
+      await api.post('/api/favorites', { city: `${current.city}, ${current.country}` });
+      addToast(`${current.city} added to favourites ★`, 'success');
+    } catch {
+      addToast('Could not save favourite', 'error');
+    } finally { setSaving(false); }
+  };
 
-  const tempHigh = forecast?.daily?.[0]?.tempHigh;
-  const tempLow = forecast?.daily?.[0]?.tempLow;
+  const handleShare = () => {
+    const url = `${window.location.origin}?city=${encodeURIComponent(current.city)}`;
+    navigator.clipboard?.writeText(url).then(() => addToast('Link copied!', 'info'));
+  };
+
+  const metaChips = [
+    { icon: '💧', label: `${current.humidity}%`,                  sub: 'Humidity' },
+    { icon: '💨', label: convertWind(current.windSpeed, units),    sub: 'Wind' },
+    { icon: '🌡', label: `${convertTemp(current.feelsLike, units)}${unitLabel}`, sub: 'Feels like' },
+    { icon: '👁', label: '10 km',                                  sub: 'Visibility' },
+  ];
 
   return (
-    <div 
-      className="relative overflow-hidden p-8 rounded-[32px] text-white transition-all duration-500 shadow-2xl"
-      style={{
-        background: 'rgba(255, 255, 255, 0.03)',
-        backdropFilter: 'blur(24px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45 }}
+      className="relative overflow-hidden rounded-[28px] p-8"
+      style={{ border: '1px solid rgba(255,255,255,0.10)', minHeight: 260 }}
     >
-      {/* City & Date */}
-      <div className="flex justify-between items-start mb-10">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5 translate-x-[-2px]">
-            <MapPin size={16} className="text-brand-primary" />
-            <span className="text-xl font-bold tracking-tight">{current.city}, {current.country}</span>
-          </div>
-          <p className="text-sm font-medium text-white/40">
-            {formatWeatherDate(now, { weekday: 'long', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
+      <div className="absolute inset-0 transition-all duration-700" style={{ background: gradient, opacity: 0.6 }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(0,0,0,0.28) 0%,transparent 60%)' }} />
 
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onAddFavorite(current.city)}
-          disabled={isFavorite}
-          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-            isFavorite 
-              ? 'bg-amber-500 text-white border-none cursor-default' 
-              : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
-          }`}
-        >
-          <Star size={18} fill={isFavorite ? 'currentColor' : 'none'} />
-        </motion.button>
-      </div>
-
-      {/* Main Temp & Icon */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
-        <div className="flex flex-col items-center md:items-start">
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-8xl md:text-9xl font-bold tracking-tighter mb-2"
-          >
-            {convertTemp(current.temperature, units)}
-            <span className="text-4xl md:text-5xl font-medium text-white/30 align-top ml-1">°</span>
-          </motion.div>
-          
-          <div className="flex items-center gap-4">
-            <span className="text-xl font-semibold opacity-90">{current.description}</span>
-            {tempHigh && tempLow && (
-              <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/60">
-                <span className="flex items-center gap-1"><ArrowUp size={12} className="text-red-400" />{convertTemp(tempHigh, units)}°</span>
-                <span className="flex items-center gap-1"><ArrowDown size={12} className="text-blue-400" />{convertTemp(tempLow, units)}°</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', damping: 15 }}
-          className="relative"
-        >
-          <div className="absolute inset-0 bg-brand-primary/20 blur-[60px] rounded-full scale-150" />
-          <Icon size={140} strokeWidth={1.5} className="relative drop-shadow-2xl" />
-        </motion.div>
-      </div>
-
-      {/* Meta chips */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { icon: <Thermometer size={16} />, label: 'Feels Like', value: `${convertTemp(current.feelsLike, units)}°` },
-          { icon: <Droplets size={16} />, label: 'Humidity', value: `${current.humidity}%` },
-          { icon: <Wind size={16} />, label: 'Wind Speed', value: convertWind(current.windSpeed, units) },
-          { icon: <Compass size={16} />, label: 'Pressure', value: '1012 hPa' }, // Example fallback
-        ].map((chip, idx) => (
-          <div key={idx} className="flex flex-col gap-1 p-3 rounded-2xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-2 text-white/30 font-medium text-[11px] uppercase tracking-wider">
-              {chip.icon}
-              {chip.label}
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin size={14} style={{ color: 'rgba(255,255,255,0.5)' }} />
+              <span className="text-[22px] font-bold text-white leading-none">{current.city}</span>
+              <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>{current.country}</span>
             </div>
-            <span className="text-base font-bold whitespace-nowrap">{chip.value}</span>
+
+            <motion.div
+              key={String(current.temperature) + units}
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 180, damping: 14 }}
+              className="text-white leading-none font-light"
+              style={{ fontSize: 'clamp(64px, 10vw, 84px)', letterSpacing: '-3px' }}
+            >
+              {convertTemp(current.temperature, units)}
+              <sup style={{ fontSize: 28, fontWeight: 400, letterSpacing: 0, verticalAlign: 'super' }}>
+                {unitLabel}
+              </sup>
+            </motion.div>
+
+            <div className="flex items-center gap-3 mt-2.5 flex-wrap">
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium capitalize"
+                style={{ background: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.92)' }}
+              >
+                {emoji} {current.description}
+              </span>
+              {today && (
+                <span className="flex items-center gap-2 text-[14px] font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  <span className="flex items-center gap-0.5 text-white">
+                    <ArrowUp size={12} style={{ color: '#f87171' }} />{convertTemp(today.tempHigh, units)}°
+                  </span>
+                  <span className="flex items-center gap-0.5" style={{ opacity: 0.55 }}>
+                    <ArrowDown size={12} style={{ color: '#60a5fa' }} />{convertTemp(today.tempLow, units)}°
+                  </span>
+                </span>
+              )}
+            </div>
           </div>
-        ))}
+
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span style={{ fontSize: 72, lineHeight: 1, filter: 'drop-shadow(0 4px 14px rgba(255,255,255,0.12))' }}>{emoji}</span>
+            <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mt-6">
+          {metaChips.map(chip => (
+            <div key={chip.sub} className="flex items-center gap-1.5 px-3.5 py-2 rounded-[12px] text-[13px]"
+              style={{ background: 'rgba(0,0,0,0.22)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.82)' }}>
+              <span style={{ fontSize: 14 }}>{chip.icon}</span>
+              <span className="font-semibold">{chip.label}</span>
+              <span style={{ color: 'rgba(255,255,255,0.42)', fontSize: 11 }}>{chip.sub}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2 mt-4">
+          <ActionButton variant="primary" onClick={() => { localStorage.setItem('defaultCity', current.city); addToast(`${current.city} set as default`, 'success'); }}>
+            <Bookmark size={13} /> Set default
+          </ActionButton>
+          <ActionButton variant="fav" onClick={handleSave} disabled={saving}>
+            <Star size={13} /> {saving ? 'Saving…' : 'Save'}
+          </ActionButton>
+          <ActionButton variant="ghost" onClick={handleShare}>
+            <Share2 size={13} /> Share
+          </ActionButton>
+        </div>
       </div>
-    </div>
+    </motion.div>
+  );
+}
+
+function ActionButton({ children, onClick, variant = 'ghost', disabled = false }) {
+  const s = {
+    primary: { background: 'var(--brand-primary)', borderColor: 'var(--brand-primary)', color: '#fff' },
+    fav:     { background: 'rgba(251,191,36,0.10)', borderColor: 'rgba(251,191,36,0.25)', color: 'rgba(251,191,36,0.9)' },
+    ghost:   { background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.12)', color: '#fff' },
+  };
+  return (
+    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }} onClick={onClick} disabled={disabled}
+      className="flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] text-[13px] font-semibold border cursor-pointer"
+      style={{ ...s[variant], opacity: disabled ? 0.6 : 1 }}>
+      {children}
+    </motion.button>
   );
 }
