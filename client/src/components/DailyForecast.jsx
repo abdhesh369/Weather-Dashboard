@@ -23,7 +23,7 @@ export default function DailyForecast({ dailyData = [], units }) {
 
   return (
     <TiltCard>
-      <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
+      <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
       <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
         7-day forecast
       </p>

@@ -93,4 +93,9 @@ export function useWeather() {
     if (defaultCity) {
       fetchWeather({ city: defaultCity });
     }
-    // No silent
+    // No silent geolocation on mount — user must click the button
+  }, [fetchWeather]);
+
+  return { weatherData, loading, error, searchHistory, fetchWeather, fetchByGeolocation };
+}
+

@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
 import { convertWind } from '../utils/converters';
 
-function StatCard({ label, value, sub, percent, barGradient, delay = 0 }) {
+function StatCard({ label, value, sub, percent, barGradient, delay = 0, children }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="glass p-8 rounded-[24px] group"
+      className="glass p-10 rounded-[24px] group"
     >
       <p className="text-[11px] font-bold uppercase tracking-[0.1em] mb-4 opacity-40">
         {label}

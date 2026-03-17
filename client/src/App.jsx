@@ -219,13 +219,21 @@ function App() {
                   <div className="flex flex-col gap-4">
                     {weatherData && (
                       <>
-                        <DailyForecast
-                          dailyData={weatherData.forecast?.daily}
-                          units={units}
-                        />
-                        <SunCard sunrise="6:12" sunset="20:34" />
-                        <UVCard uv={weatherData.current?.uvi ?? 4} />
-                        <AQICard aqiData={weatherData.aqi} />
+                        <WidgetErrorBoundary>
+                          <DailyForecast
+                            dailyData={weatherData.forecast?.daily}
+                            units={units}
+                          />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary>
+                          <SunCard sunrise="6:12" sunset="20:34" />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary>
+                          <UVCard uv={weatherData.current?.uvi ?? 4} />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary>
+                          <AQICard aqiData={weatherData.aqi} />
+                        </WidgetErrorBoundary>
                       </>
                     )}
 
@@ -250,6 +258,7 @@ function App() {
         </Routes>
       </div>
 
+      <MobileBottomTab activeTab={activeTab} onTabChange={setActiveTab} />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>
   );

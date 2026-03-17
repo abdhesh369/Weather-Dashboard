@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import TiltCard from './TiltCard';
+import TiltCard from '../ui/TiltCard';
 
 const AQI_LEVELS = [
   { label: 'Good', color: '#22c55e', desc: 'Air quality is satisfactory.' },
@@ -18,7 +18,7 @@ export default function AQICard({ aqiData }) {
 
   return (
     <TiltCard>
-      <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
+      <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
         <div className="flex justify-between items-start">
           <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
             Air Quality

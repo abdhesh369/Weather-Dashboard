@@ -2,7 +2,7 @@
  * Lightweight glass card — single source of truth for all card surfaces.
  * Replaces LiquidGlassCard for static, non-draggable content.
  */
-export default function GlassCard({ children, className = '', style = {}, padding = '20px 24px' }) {
+export default function GlassCard({ children, className = '', style = {}, padding = '28px 32px' }) {
   return (
     <div
       className={`glass rounded-[24px] ${className}`}

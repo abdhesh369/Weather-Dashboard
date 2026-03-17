@@ -110,3 +110,26 @@ export const getWeatherData = async (req, res) => {
     res.status(500).json({ message: 'An error occurred while fetching weather data.' });
   }
 };
+
+export const getGeocodeData = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) return res.status(400).json({ message: 'Query is required' });
+
+    const url = `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(q)}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
+    const response = await axios.get(url);
+
+    const suggestions = response.data.map(item => ({
+      name: item.name,
+      country: item.country,
+      state: item.state,
+      lat: item.lat,
+      lon: item.lon,
+    }));
+
+    return res.json(suggestions);
+  } catch (error) {
+    console.error('Geocode Error:', error.message);
+    res.status(500).json({ message: 'Error fetching suggestions' });
+  }
+};

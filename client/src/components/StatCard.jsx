@@ -11,7 +11,7 @@ export default function StatCard({
 }) {
   return (
     <div 
-      className="p-5 rounded-[24px] flex flex-col gap-4 transition-all duration-300 hover:translate-y-[-4px]"
+      className="p-7 rounded-[24px] flex flex-col gap-4 transition-all duration-300 hover:translate-y-[-4px]"
       style={{
         background: 'rgba(255, 255, 255, 0.04)',
         border: '1px solid rgba(255, 255, 255, 0.08)',

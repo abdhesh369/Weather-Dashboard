@@ -10,7 +10,7 @@ export default function FavoritesList({
   onAddCurrentCity,
 }) {
   return (
-    <div className="glass p-6 rounded-[32px] flex flex-col gap-6">
+    <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
       <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
         Favourites
       </p>

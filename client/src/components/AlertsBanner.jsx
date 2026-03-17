@@ -19,7 +19,7 @@ export default function AlertsBanner({ alerts = [] }) {
         className="overflow-hidden"
       >
         <div 
-          className="mx-auto max-w-[1100px] mb-4 p-4 rounded-[18px] flex items-center justify-between gap-4 border"
+          className="mx-auto max-w-[1100px] mb-4 p-6 rounded-[18px] flex items-center justify-between gap-4 border"
           style={{ 
             background: isExtreme ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
             borderColor: isExtreme ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)',

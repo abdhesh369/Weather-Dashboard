@@ -99,7 +99,7 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
        onMouseMove={handleMouseMove}
        onMouseLeave={handleMouseLeave}
        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-       className="glass relative overflow-hidden rounded-[32px] p-10 md:p-12 group"
+       className="glass relative overflow-hidden rounded-[32px] p-12 md:p-14 group"
        style={{ 
          minHeight: 320,
          rotateX,
