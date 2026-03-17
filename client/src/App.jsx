@@ -31,6 +31,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFoundPage';
 import MobileBottomTab from './components/layout/MobileBottomTab';
+import WeatherBackground from './components/layout/WeatherBackground';
+import { CloudSun } from 'lucide-react';
 
 
 export const ToastContext = createContext(null);
@@ -119,7 +121,8 @@ function App() {
 
   return (
     <ToastContext.Provider value={addToast}>
-      <div className={`app-wrapper ${bgClass} selection:bg-brand-primary/30 min-h-screen`}>
+      <div className={`app-wrapper selection:bg-brand-primary/30 min-h-screen relative`}>
+        <WeatherBackground condition={weatherData?.current?.condition} />
         <Navbar units={units} setUnits={setUnits} />
 
         <Routes>
@@ -170,9 +173,9 @@ function App() {
                           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                           className="py-32 text-center"
                         >
-                          <div className="relative w-24 h-24 mx-auto mb-8">
+                          <div className="relative w-24 h-24 mx-auto mb-8 flex items-center justify-center">
                              <div className="absolute inset-0 bg-brand-primary/20 blur-3xl rounded-full anim-float" />
-                             <div className="relative text-[80px] leading-none opacity-80">🌤️</div>
+                             <CloudSun size={80} className="relative text-white/80 drop-shadow-2xl" />
                           </div>
                           <h2 className="text-[24px] font-bold text-white mb-3">
                             Ready to explore?

@@ -10,8 +10,8 @@ export default function FavoritesList({
   onAddCurrentCity,
 }) {
   return (
-    <div className="glass p-8 rounded-[32px] flex flex-col gap-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+    <div className="glass glass-interactive rounded-[32px] flex flex-col gap-6" style={{ padding: '40px' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-40">
         Favourites
       </p>
 
@@ -38,16 +38,24 @@ export default function FavoritesList({
                 transition={{ delay: i * 0.04 }}
                 role="button"
                 tabIndex={0}
-                className="flex items-center justify-between px-3 py-2.5 rounded-[10px] cursor-pointer transition-all duration-200 group"
+                className="flex items-center justify-between px-4 py-3 rounded-[12px] cursor-pointer transition-all duration-300 group border-l-2 border-l-transparent"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
                 onClick={() => onCityClick(city)}
                 onKeyDown={e => e.key === 'Enter' && onCityClick(city)}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                onMouseEnter={e => {
+                   e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                   e.currentTarget.style.borderLeftColor = 'var(--brand-primary)';
+                }}
+                onMouseLeave={e => {
+                   e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                   e.currentTarget.style.borderLeftColor = 'transparent';
+                }}
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Star size={12} style={{ color: 'rgba(251,191,36,0.7)', flexShrink: 0 }} fill="rgba(251,191,36,0.7)" />
-                  <span className="text-[14px] font-medium text-white truncate">{city}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Star size={13} style={{ color: 'rgba(251,191,36,0.8)', flexShrink: 0 }} fill="rgba(251,191,36,0.8)" />
+                  <span className="text-[15px] font-semibold text-white truncate">{city}</span>
                 </div>
                 <button
                   onClick={e => { e.stopPropagation(); onRemoveFavorite(city); }}

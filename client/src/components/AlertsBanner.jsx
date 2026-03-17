@@ -19,7 +19,7 @@ export default function AlertsBanner({ alerts = [] }) {
         className="overflow-hidden"
       >
         <div 
-          className="mx-auto max-w-[1100px] mb-4 p-6 rounded-[18px] flex items-center justify-between gap-4 border"
+          className="mx-auto max-w-[1100px] mb-4 p-8 rounded-[18px] flex items-center justify-between gap-4 border"
           style={{ 
             background: isExtreme ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
             borderColor: isExtreme ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)',
@@ -28,16 +28,19 @@ export default function AlertsBanner({ alerts = [] }) {
         >
           <div className="flex items-center gap-3">
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: isExtreme ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)' }}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isExtreme ? 'animate-[ping_1.5s_ease-in-out_infinite]' : 'animate-pulse'}`}
+              style={{ 
+                background: isExtreme ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.2)',
+                boxShadow: isExtreme ? '0 0 15px rgba(239,68,68,0.3)' : 'none'
+              }}
             >
-              <AlertTriangle size={16} className={isExtreme ? 'text-red-400' : 'text-amber-400'} />
+              <AlertTriangle size={18} className={isExtreme ? 'text-red-400' : 'text-amber-400'} />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[13px] font-bold text-white leading-tight">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[14px] font-bold text-white leading-tight">
                 {mainAlert.event || 'Weather Alert'}
               </span>
-              <span className="text-[11px] text-white/50 font-medium">
+              <span className="text-[12px] text-white/60 font-medium leading-relaxed">
                 {mainAlert.description?.slice(0, 100)}...
               </span>
             </div>

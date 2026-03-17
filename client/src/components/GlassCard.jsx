@@ -1,18 +1,23 @@
+import { motion } from 'framer-motion';
+
 /**
  * Lightweight glass card — single source of truth for all card surfaces.
  * Replaces LiquidGlassCard for static, non-draggable content.
  */
-export default function GlassCard({ children, className = '', style = {}, padding = '28px 32px' }) {
+export default function GlassCard({ children, className = '', style = {}, padding = '40px 48px' }) {
   return (
-    <div
-      className={`glass rounded-[24px] ${className}`}
+    <motion.div
+      whileHover={{ scale: 1.015, translateY: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className={`glass glass-interactive rounded-[24px] ${className}`}
       style={{
         padding,
         ...style,
       }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 

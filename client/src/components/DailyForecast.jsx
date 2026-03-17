@@ -1,18 +1,7 @@
 import { motion } from 'framer-motion';
 import { convertTemp } from '../utils/converters';
-
-function getEmoji(condition = '') {
-  const c = condition.toLowerCase();
-  if (c.includes('clear'))   return '☀️';
-  if (c.includes('drizzle')) return '🌦️';
-  if (c.includes('rain'))    return '🌧️';
-  if (c.includes('snow'))    return '❄️';
-  if (c.includes('thunder')) return '⛈️';
-  if (c.includes('cloud'))   return '☁️';
-  return '🌤️';
-}
-
 import TiltCard from './ui/TiltCard';
+import { getWeatherIcon } from '../lib/weatherIcons';
 
 export default function DailyForecast({ dailyData = [], units }) {
   const allLo = dailyData.map(d => convertTemp(d.tempLow,  units));
@@ -23,8 +12,8 @@ export default function DailyForecast({ dailyData = [], units }) {
 
   return (
     <TiltCard>
-      <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+      <div className="glass glass-interactive rounded-[32px] flex flex-col gap-6" style={{ padding: '48px' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-40">
         7-day forecast
       </p>
 
@@ -38,22 +27,25 @@ export default function DailyForecast({ dailyData = [], units }) {
           return (
             <motion.div
               key={day.day + i}
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="flex items-center gap-3 py-[11px]"
-              style={{ borderBottom: i < dailyData.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}
+              initial={{ opacity: 0, x: -15, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+              whileHover={{ x: 6, backgroundColor: 'rgba(255,255,255,0.08)' }}
+              transition={{ delay: i * 0.05 + 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="flex items-center gap-4 py-[14px] px-2 rounded-xl transition-colors hover:bg-white/5 group/row"
+              style={{ borderBottom: i < dailyData.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
             >
               {/* Day */}
-              <span className="text-[14px] font-semibold text-white w-[60px] shrink-0">
+              <span className="text-[15px] font-bold text-white w-[64px] shrink-0">
                 {i === 0 ? 'Today' : day.day}
               </span>
-
-              {/* Emoji */}
-              <span style={{ fontSize: 18, flexShrink: 0 }}>{getEmoji(day.condition)}</span>
+              
+              {/* Icon */}
+              <div className="text-white drop-shadow-sm group-hover/row:scale-110 transition-transform shrink-0">
+                {getWeatherIcon(day.condition, 20)}
+              </div>
 
               {/* Condition */}
-              <span className="text-[12px] flex-1 truncate capitalize" style={{ color: 'rgba(255,255,255,0.42)' }}>
+              <span className="text-[13px] font-medium flex-1 truncate capitalize opacity-40 group-hover/row:opacity-100 transition-opacity">
                 {day.condition}
               </span>
 

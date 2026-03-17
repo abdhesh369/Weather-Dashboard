@@ -1,6 +1,8 @@
 import { useContext, useState } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { MapPin, Star, Share2, Bookmark, ArrowUp, ArrowDown } from 'lucide-react';
+import { motion, useMotionValue, useSpring, useTransform, useScroll } from 'framer-motion';
+import { MapPin, Star, Share2, Bookmark, ArrowUp, ArrowDown, Navigation, Wind, Droplets, Thermometer, Clock } from 'lucide-react';
+import { getWeatherIcon } from '../lib/weatherIcons';
+import AnimatedCounter from './ui/AnimatedCounter';
 import { AuthContext } from '../context/AuthContext';
 import { ToastContext } from '../App';
 import api from '../lib/api';
@@ -15,11 +17,6 @@ const GRADIENTS = {
   snow:         'linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #b8c8da 100%)',
   thunderstorm: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)',
   default:      'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-};
-
-const EMOJIS = {
-  clear: '☀️', clouds: '☁️', rain: '🌧️',
-  drizzle: '🌦️', snow: '❄️', thunderstorm: '⛈️', default: '🌤️',
 };
 
 function getConditionKey(condition = '') {
@@ -43,7 +40,6 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
   const today = forecast?.daily?.[0];
   const condKey = getConditionKey(current.condition);
   const gradient = GRADIENTS[condKey] ?? GRADIENTS.default;
-  const emoji = EMOJIS[condKey] ?? EMOJIS.default;
   const unitLabel = units === 'metric' ? '°C' : '°F';
 
   const handleSave = async () => {
@@ -99,9 +95,9 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
        onMouseMove={handleMouseMove}
        onMouseLeave={handleMouseLeave}
        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-       className="glass relative overflow-hidden rounded-[32px] p-12 md:p-14 group"
+       className="glass glass-interactive shimmer-active relative overflow-hidden rounded-[32px] group"
        style={{ 
-         minHeight: 320,
+         padding: '56px',
          rotateX,
          rotateY,
          transformStyle: 'preserve-3d',
@@ -138,9 +134,9 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
                 initial={{ opacity: 0, filter: 'blur(10px)' }}
                 animate={{ opacity: 1, filter: 'blur(0px)' }}
                 className="text-white leading-none font-bold tracking-tight"
-                style={{ fontSize: 'clamp(64px, 8vw, 84px)' }}
+                style={{ fontSize: 'clamp(72px, 10vw, 104px)', textShadow: 'var(--text-shadow-md)' }}
               >
-                {convertTemp(current.temperature, units)}
+                <AnimatedCounter value={Number(convertTemp(current.temperature, units))} />
                 <span className="text-[20px] font-medium opacity-60 ml-1 align-top mt-2 inline-block">
                   {unitLabel}
                 </span>
@@ -152,23 +148,23 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
                     border: `1px solid ${current.feelsLike > current.temperature ? 'rgba(244,63,94,0.2)' : 'rgba(56,189,248,0.2)'}`
                   }}
                 >
-                  <span className="opacity-60">Feels like</span> {convertTemp(current.feelsLike, units)}°
+                  <span className="opacity-60">Feels like</span> <AnimatedCounter value={Number(convertTemp(current.feelsLike, units))} />°
                 </div>
               </motion.div>
               
               <div className="h-20 w-[1px] bg-white/10 hidden md:block" />
 
-              <div className="flex flex-col gap-1">
-                <span className="text-[20px] md:text-[24px] font-semibold text-white capitalize leading-tight">
+              <div className="flex flex-col gap-1 mt-2">
+                <span className="text-[24px] md:text-[32px] font-bold text-white capitalize leading-tight tracking-tight" style={{ textShadow: 'var(--text-shadow-sm)' }}>
                    {current.description}
                 </span>
                 {today && (
                   <div className="flex items-center gap-3 text-[15px] font-medium text-white/70">
                     <span className="flex items-center gap-1">
-                      <ArrowUp size={14} className="text-rose-400" />{convertTemp(today.tempHigh, units)}°
+                      <ArrowUp size={14} className="text-rose-400" /><AnimatedCounter value={Number(convertTemp(today.tempHigh, units))} />°
                     </span>
                     <span className="flex items-center gap-1 opacity-60">
-                      <ArrowDown size={14} className="text-blue-400" />{convertTemp(today.tempLow, units)}°
+                      <ArrowDown size={14} className="text-blue-400" /><AnimatedCounter value={Number(convertTemp(today.tempLow, units))} />°
                     </span>
                   </div>
                 )}
@@ -177,13 +173,16 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
           </div>
 
           <div className="flex flex-col items-end gap-2">
-            <motion.span 
-              animate={{ y: [0, -8, 0] }}
+            <motion.div 
+              animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              style={{ fontSize: 72, filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.3))' }}
+              className="text-white drop-shadow-2xl relative"
             >
-              {emoji}
-            </motion.span>
+              <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full" />
+              <div className="relative filter saturate-[1.2]">
+                {getWeatherIcon(current.condition, 72)}
+              </div>
+            </motion.div>
             <span className="text-[14px] font-medium text-white/50 tracking-wider uppercase">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </span>
@@ -193,10 +192,10 @@ export default function HeroCard({ weatherData, units, onSetDefault }) {
         <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-white/10">
           <div className="flex flex-wrap gap-4">
             {metaChips.map(chip => (
-              <div key={chip.sub} className="flex flex-col gap-0.5">
-                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">{chip.sub}</span>
-                <div className="flex items-center gap-1.5 font-bold text-white text-[16px]">
-                  <span>{chip.icon}</span>
+              <div key={chip.sub} className="flex flex-col gap-1 bg-white/5 backdrop-blur-sm px-4 py-2.5 rounded-[18px] border border-white/5 transition-colors hover:bg-white/10 group/chip">
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.12em]">{chip.sub}</span>
+                <div className="flex items-center gap-2 font-bold text-white text-[17px]">
+                  <span className="text-brand-primary/80 group-hover/chip:scale-110 transition-transform">{chip.icon}</span>
                   {chip.label}
                 </div>
               </div>

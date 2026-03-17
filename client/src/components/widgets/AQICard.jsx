@@ -18,14 +18,19 @@ export default function AQICard({ aqiData }) {
 
   return (
     <TiltCard>
-      <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
+      <div className="glass glass-interactive rounded-[32px] flex flex-col gap-6" style={{ padding: '48px' }}>
         <div className="flex justify-between items-start">
-          <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-40">
             Air Quality
           </p>
           <span 
-            className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border"
-            style={{ color, borderColor: `${color}33`, background: `${color}11` }}
+            className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border transition-all duration-300 shadow-lg"
+            style={{ 
+              color, 
+              borderColor: `${color}44`, 
+              background: `${color}15`,
+              boxShadow: `0 0 12px ${color}22`
+            }}
           >
             {label}
           </span>
@@ -39,13 +44,16 @@ export default function AQICard({ aqiData }) {
         </div>
 
         {/* Gauge bar */}
-        <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+        <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
           <motion.div 
             className="absolute top-0 left-0 h-full rounded-full"
-            style={{ background: color }}
+            style={{ 
+              background: `linear-gradient(90deg, ${AQI_LEVELS[0].color}, ${color})`,
+              boxShadow: `0 0 8px ${color}44`
+            }}
             initial={{ width: 0 }}
             animate={{ width: `${(aqiData.main.aqi / 5) * 100}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
           />
         </div>
 

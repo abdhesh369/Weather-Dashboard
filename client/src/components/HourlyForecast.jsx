@@ -1,48 +1,38 @@
 import { motion } from 'framer-motion';
 import { convertTemp } from '../utils/converters';
-
-const EMOJIS = {
-  clear: '☀️', clouds: '☁️', rain: '🌧️',
-  drizzle: '🌦️', snow: '❄️', thunderstorm: '⛈️',
-};
-
-function getEmoji(condition = '') {
-  const c = condition.toLowerCase();
-  if (c.includes('clear'))   return '☀️';
-  if (c.includes('drizzle')) return '🌦️';
-  if (c.includes('rain'))    return '🌧️';
-  if (c.includes('snow'))    return '❄️';
-  if (c.includes('thunder')) return '⛈️';
-  if (c.includes('cloud'))   return '☁️';
-  return '🌤️';
-}
+import { getWeatherIcon } from '../lib/weatherIcons';
 
 export default function HourlyForecast({ hourlyData = [], units }) {
   return (
-    <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+    <div className="glass glass-interactive rounded-[32px] flex flex-col gap-6" style={{ padding: '48px' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-40">
         Hourly Forecast
       </p>
 
-      <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
         {hourlyData.map((hour, i) => {
           const isNow = i === 0;
           return (
             <motion.div
               key={hour.time + i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.3 }}
-              className="flex flex-col items-center gap-2 px-3.5 py-3 rounded-[12px] min-w-[66px] shrink-0"
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              whileHover={{ scale: 1.05, translateY: -6 }}
+              transition={{ delay: i * 0.04 + 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center gap-3 px-4 py-4 rounded-[16px] min-w-[72px] shrink-0 border border-transparent transition-colors hover:border-white/10 hover:bg-white/5"
               style={{
-                background: isNow ? 'rgba(99,102,241,0.18)' : 'transparent',
-                border: `1px solid ${isNow ? 'rgba(99,102,241,0.35)' : 'transparent'}`,
+                background: isNow 
+                  ? 'linear-gradient(180deg, rgba(99,102,241,0.2) 0%, transparent 100%)' 
+                  : 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)',
+                borderColor: isNow ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.02)',
               }}
             >
-              <span className="text-[11px] font-semibold" style={{ color: isNow ? 'rgba(165,180,252,0.9)' : 'rgba(255,255,255,0.4)' }}>
+              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: isNow ? 'rgba(165,180,252,1)' : 'rgba(255,255,255,0.4)' }}>
                 {isNow ? 'Now' : hour.time}
               </span>
-              <span style={{ fontSize: 22 }}>{getEmoji(hour.condition)}</span>
+              <div className="text-white drop-shadow-sm filter brightness-110">
+                {getWeatherIcon(hour.condition, 24)}
+              </div>
               <span className="text-[15px] font-bold text-white">
                 {convertTemp(hour.temp, units)}°
               </span>

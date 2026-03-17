@@ -8,15 +8,17 @@ export default function Navbar({ units, setUnits }) {
   const { isAuthenticated, user, logout } = useContext(AuthContext);
 
   return (
-    <nav
-      className="sticky top-0 z-50 flex items-center justify-center w-full px-5 md:px-10 py-5"
-      style={{
-        background: 'rgba(3, 7, 18, 0.65)',
-        backdropFilter: 'blur(24px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div className="flex items-center justify-between w-full max-w-[1100px] gap-6">
+    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-6 pointer-events-none">
+      <nav
+        className="flex items-center justify-between w-full max-w-[1100px] gap-4 md:gap-6 px-4 md:px-6 py-3.5 rounded-[32px] pointer-events-auto"
+        style={{
+          background: 'rgba(15, 23, 42, 0.45)',
+          backdropFilter: 'blur(32px)',
+          WebkitBackdropFilter: 'blur(32px)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          boxShadow: '0 24px 48px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+        }}
+      >
       {/* Brand */}
       <Link to="/" className="flex items-center gap-3.5 no-underline shrink-0">
         <div
@@ -93,7 +95,7 @@ export default function Navbar({ units, setUnits }) {
           </div>
         )}
       </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }

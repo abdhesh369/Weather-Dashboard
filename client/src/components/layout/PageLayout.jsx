@@ -1,20 +1,33 @@
+import { motion } from 'framer-motion';
+
 export default function PageLayout({ left, right, fullWidth, children }) {
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  };
+
   if (fullWidth || children) {
     return (
-      <div className="max-w-[1100px] mx-auto px-5 py-8">
+      <motion.div 
+        variants={containerVariants} initial="hidden" animate="visible"
+        className="max-w-[1100px] mx-auto px-6"
+        style={{ paddingTop: '130px', paddingBottom: '40px' }}
+      >
         {children}
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="max-w-[1100px] mx-auto px-5 py-8">
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}
-        // Responsive handled below via a style tag in index.css
-      >
-        <div className="flex flex-col gap-4 min-w-0">{left}</div>
-        <aside className="flex flex-col gap-4 min-w-0">{right}</aside>
+    <motion.div 
+      variants={containerVariants} initial="hidden" animate="visible"
+      className="max-w-[1100px] mx-auto px-6"
+      style={{ paddingTop: '130px', paddingBottom: '40px' }}
+    >
+      <div className="grid gap-8" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}>
+        <div className="flex flex-col gap-6 min-w-0">{left}</div>
+        <aside className="flex flex-col gap-6 min-w-0">{right}</aside>
       </div>
-    </div>
+    </motion.div>
   );
 }

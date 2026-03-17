@@ -8,18 +8,18 @@ export default function UVCard({ uv = 0 }) {
   const pct   = Math.min((idx / 11) * 100, 95);
 
   return (
-    <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+    <div className="glass glass-interactive rounded-[32px] flex flex-col gap-6" style={{ padding: '48px' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-40">
         UV Index
       </p>
 
       <div className="flex items-baseline gap-2">
-        <span className="text-[28px] font-bold text-white leading-none">{uv}</span>
-        <span className="text-[14px] font-semibold" style={{ color }}>{label}</span>
+        <span className="text-[32px] font-bold text-white leading-none" style={{ textShadow: 'var(--text-shadow-sm)' }}>{uv}</span>
+        <span className="text-[16px] font-bold" style={{ color, textShadow: `0 0 8px ${color}66` }}>{label}</span>
       </div>
 
       {/* Colour-banded gauge */}
-      <div className="relative h-2 rounded-full overflow-visible"
+      <div className="relative h-2.5 rounded-full overflow-visible border border-white/5"
         style={{ background: 'linear-gradient(90deg,#22c55e 0%,#eab308 33%,#f97316 60%,#ef4444 80%,#7c3aed 100%)' }}>
         <div
           className="absolute top-1/2 w-4 h-4 rounded-full border-[3px] transition-all duration-500"

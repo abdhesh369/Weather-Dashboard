@@ -19,22 +19,28 @@ export default function SunCard({ sunrise = '6:12', sunset = '20:34' }) {
   const sunY = (cy - R * Math.sin(angle)).toFixed(1);
 
   return (
-    <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+    <div className="glass glass-interactive rounded-[32px] flex flex-col gap-6" style={{ padding: '48px' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-40">
         Sun
       </p>
 
-      <svg viewBox="0 0 100 52" fill="none" className="w-full" style={{ height: 52 }}>
+      <svg viewBox="0 0 100 52" fill="none" className="w-full" style={{ height: 64 }}>
         {/* Track */}
-        <path d="M 14 46 A 36 36 0 0 1 86 46" stroke="rgba(255,255,255,0.10)" strokeWidth="2" strokeLinecap="round" />
+        <path d="M 12 46 A 38 38 0 0 1 88 46" stroke="rgba(255,255,255,0.08)" strokeWidth="3" strokeLinecap="round" strokeDasharray="1 4" />
         {/* Progress */}
         <path
-          d={`M 14 46 A 36 36 0 0 1 ${sunX} ${sunY}`}
-          stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"
+          d={`M 12 46 A 38 38 0 0 1 ${sunX} ${sunY}`}
+          stroke="url(#sunGrad)" strokeWidth="3" strokeLinecap="round"
         />
+        <defs>
+          <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#fbbf24" />
+          </linearGradient>
+        </defs>
         {/* Sun glow */}
-        <circle cx={sunX} cy={sunY} r="9"  fill="rgba(251,191,36,0.15)" />
-        <circle cx={sunX} cy={sunY} r="5"  fill="#fbbf24" opacity="0.95" />
+        <circle cx={sunX} cy={sunY} r="10"  fill="rgba(251,191,36,0.3)" className="animate-[ping_3s_ease-in-out_infinite]" />
+        <circle cx={sunX} cy={sunY} r="6"  fill="#fbbf24" opacity="1" style={{ filter: 'drop-shadow(0 0 6px rgba(251,191,36,0.8))' }} className="animate-pulse" />
       </svg>
 
       <div className="flex justify-between">

@@ -35,12 +35,12 @@ export default function WeatherChart({ data = [], units }) {
   }));
 
   return (
-    <div className="glass p-10 rounded-[32px] flex flex-col gap-6">
-      <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-40">
+    <div className="glass glass-interactive rounded-[32px] flex flex-col gap-6" style={{ padding: '48px' }}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] opacity-40">
         Temperature Trend
       </p>
 
-      <ResponsiveContainer width="100%" height={160}>
+      <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
           <defs>
             <linearGradient id="gradHigh" x1="0" y1="0" x2="0" y2="1">
@@ -74,10 +74,10 @@ export default function WeatherChart({ data = [], units }) {
             wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', paddingTop: 8 }}
           />
 
-          <Area type="monotone" dataKey="High" stroke="#f59e0b" strokeWidth={2}
-            fill="url(#gradHigh)" dot={{ r: 3, fill: '#f59e0b', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
-          <Area type="monotone" dataKey="Low"  stroke="#60a5fa" strokeWidth={2}
-            fill="url(#gradLow)"  dot={{ r: 3, fill: '#60a5fa', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
+          <Area type="natural" dataKey="High" stroke="#f59e0b" strokeWidth={3}
+            fill="url(#gradHigh)" dot={{ r: 4, fill: '#f59e0b', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
+          <Area type="natural" dataKey="Low"  stroke="#60a5fa" strokeWidth={3}
+            fill="url(#gradLow)"  dot={{ r: 4, fill: '#60a5fa', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
         </AreaChart>
       </ResponsiveContainer>
     </div>

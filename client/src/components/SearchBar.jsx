@@ -71,7 +71,7 @@ export default function SearchBar({
             className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300"
             style={{ color: focused ? 'var(--brand-primary)' : 'rgba(255,255,255,0.3)' }}
           />
-          <input
+           <input
             ref={inputRef}
             type="text"
             value={value}
@@ -80,8 +80,9 @@ export default function SearchBar({
             onBlur={() => setTimeout(() => setFocused(false), 200)}
             placeholder="Search city, airport or ZIP… (Press /)"
             aria-label="Search for a city"
-            className="glass w-full h-[56px] pl-12 pr-12 text-[15px] rounded-[22px] transition-all duration-300 text-white placeholder:text-white/30 outline-none focus:border-brand-primary/40 focus:bg-white/5 focus-visible:ring-2 focus-visible:ring-brand-primary"
+            className="glass glass-interactive w-full h-[60px] pl-12 pr-12 text-[16px] rounded-[24px] transition-all duration-300 text-white placeholder:text-white/30 outline-none focus:border-brand-primary/50 focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-brand-primary focus:translate-y-0"
             autoComplete="off"
+            style={{ boxSizing: 'border-box' }}
           />
           {value && (
             <button
@@ -130,9 +131,9 @@ export default function SearchBar({
         {/* Search button */}
         <motion.button
           type="submit"
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.02, translateY: -2 }}
           whileTap={{ scale: 0.98 }}
-          className="h-[56px] px-8 rounded-[22px] text-[15px] font-bold text-white bg-brand-primary shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/40 transition-all border-none cursor-pointer shrink-0"
+          className="h-[60px] px-10 rounded-[24px] text-[15px] font-bold text-white bg-brand-primary shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 transition-all border-none cursor-pointer shrink-0"
         >
           Search
         </motion.button>
@@ -141,12 +142,12 @@ export default function SearchBar({
         <motion.button
           type="button"
           onClick={onLocate}
-          whileHover={{ scale: 1.05, rotate: 5 }}
+          whileHover={{ scale: 1.05, rotate: 5, translateY: -2 }}
           whileTap={{ scale: 0.95 }}
           title="Use my location"
-          className="glass w-[56px] h-[56px] rounded-[22px] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all duration-300"
+          className="glass glass-interactive w-[60px] h-[60px] rounded-[24px] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 cursor-pointer transition-all duration-300"
         >
-          <LocateFixed size={20} />
+          <LocateFixed size={22} />
         </motion.button>
       </form>
 

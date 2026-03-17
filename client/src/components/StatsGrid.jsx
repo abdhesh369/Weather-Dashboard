@@ -1,19 +1,30 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { convertWind } from '../utils/converters';
+import { StatIcons } from '../lib/weatherIcons';
+import AnimatedCounter from './ui/AnimatedCounter';
 
 function StatCard({ label, value, sub, percent, barGradient, delay = 0, children }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.03, translateY: -4 }}
+      whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="glass p-10 rounded-[24px] group"
+      className="glass glass-interactive rounded-[24px] group"
+      style={{ padding: '40px' }}
     >
-      <p className="text-[11px] font-bold uppercase tracking-[0.1em] mb-4 opacity-40">
-        {label}
-      </p>
-      <p className="text-[26px] font-bold text-white leading-none mb-1 transition-transform duration-300 group-hover:translate-x-1">{value}</p>
-      <p className="text-[12px] mb-4 opacity-50 font-medium">{sub}</p>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-white/10" style={{ background: `${barGradient?.split(',')[1]}22` }}>
+           {StatIcons[label.replace(/\s+/g, '')] && React.createElement(StatIcons[label.replace(/\s+/g, '')], { size: 18, className: "text-white/90 drop-shadow-sm" })}
+        </div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.12em] opacity-40">
+          {label}
+        </p>
+      </div>
+      <p className="text-[28px] font-bold text-white leading-none mb-1 transition-transform duration-300 group-hover:translate-x-1" style={{ textShadow: 'var(--text-shadow-sm)' }}>{value}</p>
+      <p className="text-[13px] mb-5 opacity-50 font-medium">{sub}</p>
       
       {percent !== undefined ? (
         <div className="h-1.5 rounded-full overflow-hidden bg-white/5 relative">
@@ -69,7 +80,7 @@ export default function StatsGrid({ weatherData, units }) {
   const stats = [
     {
       label: 'Humidity',
-      value: `${hum}%`,
+      value: <><AnimatedCounter value={hum} />%</>,
       sub: hum < 40 ? 'Low — dry air' : hum < 70 ? 'Comfortable' : 'High — muggy',
       percent: hum,
       barGradient: 'linear-gradient(90deg,#3b82f6,#06b6d4)',
@@ -77,14 +88,14 @@ export default function StatsGrid({ weatherData, units }) {
     },
     {
       label: 'Wind',
-      value: convertWind(wind, units),
+      value: <>{convertWind(wind, units)}</>,
       sub: wind < 5 ? 'Calm' : wind < 15 ? 'Light breeze' : wind < 30 ? 'Moderate' : 'Strong winds',
       children: <WindCompass deg={current.windDeg} />,
       delay: 0.06,
     },
     {
       label: 'Pressure',
-      value: `${pressure} hPa`,
+      value: <><AnimatedCounter value={pressure} /> hPa</>,
       sub: pressure > 1013 ? 'High pressure' : pressure < 1000 ? 'Low pressure' : 'Normal',
       percent: Math.round(Math.min(Math.max(((pressure - 980) / 60) * 100, 0), 100)),
       barGradient: 'linear-gradient(90deg,#f59e0b,#ef4444)',
@@ -92,7 +103,7 @@ export default function StatsGrid({ weatherData, units }) {
     },
     {
       label: 'Visibility',
-      value: `${vis} km`,
+      value: <><AnimatedCounter value={vis} /> km</>,
       sub: vis >= 10 ? 'Excellent' : vis >= 5 ? 'Good' : 'Poor',
       percent: Math.min((vis / 10) * 100, 100),
       barGradient: 'linear-gradient(90deg,#8b5cf6,#ec4899)',
@@ -101,7 +112,7 @@ export default function StatsGrid({ weatherData, units }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {stats.map(s => <StatCard key={s.label} {...s} />)}
     </div>
   );
