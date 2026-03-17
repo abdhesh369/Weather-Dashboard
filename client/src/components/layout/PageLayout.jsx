@@ -12,7 +12,7 @@ const containerVariants = {
  * Extra bottom padding accounts for the mobile bottom nav bar.
  */
 export default function PageLayout({ left, right, fullWidth, children }) {
-  const wrapClass = 'max-w-[1100px] mx-auto px-4 sm:px-6';
+  const wrapClass = 'max-w-[1200px] mx-auto px-4 sm:px-6 w-full';
   const topPad    = { paddingTop: 'clamp(96px, 13vw, 128px)', paddingBottom: '120px' };
 
   if (fullWidth || children) {

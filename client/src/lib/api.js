@@ -28,7 +28,8 @@ api.interceptors.response.use(
     if (
       err.response?.status === 401 &&
       !original._retried &&
-      !original.url?.includes('/api/auth/') // don't retry auth routes
+      !original.url?.includes('/auth/') && // Catch both /api/auth and auth
+      window.location.pathname !== '/login' // Don't auto-refresh/retry if we are already trying to log in
     ) {
       original._retried = true;
       try {
