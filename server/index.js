@@ -150,8 +150,12 @@ app.use((err, req, res, next) => {
 // ── Serve client in production ───────────────────────
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
-  app.get('/:path*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client/dist/index.html'));
+  // Serve SPA index.html for all non-API GET requests (SPA catch-all)
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.resolve(__dirname, '../client/dist/index.html'));
+    }
+    next();
   });
 }
 
