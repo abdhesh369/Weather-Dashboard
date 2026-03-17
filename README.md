@@ -2,21 +2,22 @@
 
 A production-ready full-stack MERN weather application with a premium glassmorphic UI.
 
-## ✨ Features
+🌐 **Live Demo:** [https://skycast-g45p.onrender.com](https://skycast-g45p.onrender.com)
 
-- **Real-time weather** — current conditions + 5-day forecast via OpenWeatherMap
-- **Hourly forecast** — 6-slot 18-hour view with rain probability
-- **Interactive charts** — dual high/low temperature trend (Recharts AreaChart)
-- **Dynamic backgrounds** — gradient shifts based on weather condition
-- **Stat cards** — humidity, wind, pressure, visibility with animated progress bars
-- **Sun arc widget** — live SVG arc showing today's sunrise/sunset position
-- **UV index gauge** — colour-banded needle indicator
-- **User auth** — JWT (HttpOnly cookie) + refresh token + CSRF protection
-- **Favourites** — add/remove cities, persisted per account (max 20)
-- **Unit toggle** — metric ↔ imperial, persisted to account
-- **Geolocation** — one-click "use my location"
-- **Skeleton loading** — smooth pulse placeholders while data loads
-- **Toast notifications** — animated success/error/info toasts
+---
+
+## ✨ Premium Features
+
+- **Immersive Glassmorphism** — Sleek, modern UI with frosted glass effects and deep blur.
+- **Dynamic weather** — Atmospheric background gradients that shift in real-time based on current conditions.
+- **Hourly forecast** — 18-hour predictive view with rain probability and animated state transitions.
+- **Interactive charts** — Dual high/low temperature trends powered by `Recharts` for deep data visualization.
+- **Live Widgets** — Custom-engineered Sun arc, UV Index gauge, and Air Quality widgets.
+- **Advanced Auth** — Secure JWT implementation with HttpOnly cookies, silent token refresh, and CSRF protection.
+- **Personalized Experience** — Save up to 20 favorite cities, toggle between Metric/Imperial, and persist preferences.
+- **Smart Geolocation** — Zero-config "Use My Location" to get instant local weather intel.
+- **Responsive & Centered** — Optimsed for all screens with a perfectly balanced, centered 1200px layout.
+- **Micro-Animations** — Powered by `Framer Motion` for smooth transitions, staggered entrances, and physics-based interactions.
 
 ## 🏗 Tech Stack
 
