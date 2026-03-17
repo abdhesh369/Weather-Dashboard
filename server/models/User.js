@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim:      true,
       match:     [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
-      index:     true,
     },
     password: {
       type:     String,
@@ -42,9 +41,6 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-// ── Indexes ───────────────────────────────────────────────────────────────────
-userSchema.index({ email: 1 });
 
 // ── Instance helper: safe public profile ─────────────────────────────────────
 userSchema.methods.toPublicJSON = function () {
