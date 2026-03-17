@@ -4,28 +4,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="SkyCast — live weather forecasts, hourly & 7-day outlook, air quality, UV index and more." />
+  <meta name="description"
+    content="SkyCast — live weather forecasts, hourly & 7-day outlook, air quality, UV index and more." />
   <meta name="theme-color" content="#6366f1" />
-  <meta property="og:title"       content="SkyCast | Premium Weather Dashboard" />
-  <meta property="og:description" content="Beautiful live weather with hourly & 7-day forecasts, AQI, UV index and more." />
-  <meta property="og:type"        content="website" />
+  <meta property="og:title" content="SkyCast" />
+  <meta property="og:description"
+    content="Beautiful live weather with hourly & 7-day forecasts, AQI, UV index and more." />
+  <meta property="og:type" content="website" />
   <!-- Performance: preconnect to fonts CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="manifest" href="/manifest.json" />
-  <title>SkyCast | Premium Weather Dashboard</title>
+  <title>SkyCast</title>
 </head>
 
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js');
-        });
-      }
-    </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js');
+      });
+    }
+  </script>
 </body>
 
 </html>

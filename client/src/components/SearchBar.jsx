@@ -59,15 +59,15 @@ export default function SearchBar({
 
   return (
     <div className="flex flex-col gap-3 relative">
-      <form onSubmit={e => { e.preventDefault(); submit(value); }} className="flex gap-3 items-center">
+      <form onSubmit={e => { e.preventDefault(); submit(value); }} className="flex gap-3 items-center flex-nowrap">
 
         {/* Search input */}
         <div className="relative flex-1 group">
           <div className="absolute inset-0 bg-brand-primary/5 rounded-[22px] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
           <Search
-            size={17}
-            className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300"
-            style={{ color: focused ? 'var(--brand-primary)' : 'rgba(255,255,255,0.28)' }}
+            size={18}
+            className="absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 z-10"
+            style={{ color: focused ? 'var(--brand-primary)' : 'rgba(255,255,255,0.35)' }}
           />
           <input
             ref={inputRef}
@@ -81,11 +81,11 @@ export default function SearchBar({
             aria-label="Search for a city"
             aria-autocomplete="list"
             aria-expanded={dropdownOpen}
-            className="glass glass-interactive w-full h-[58px] pl-12 pr-12 text-[15px] rounded-[24px] transition-all duration-300 text-white placeholder:text-white/28 outline-none focus:border-brand-primary/50 focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-brand-primary"
+            className="glass glass-interactive w-full h-[58px] pl-16 pr-12 text-[15px] rounded-[24px] transition-all duration-300 text-white placeholder:text-white/40 outline-none focus:border-brand-primary/50 focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-brand-primary"
             autoComplete="off"
           />
           {/* Spinner / clear */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
             {loading ? (
               <motion.div
                 animate={{ rotate: 360 }}
@@ -184,7 +184,7 @@ export default function SearchBar({
           type="submit"
           whileHover={{ scale: 1.02, translateY: -2 }}
           whileTap={{ scale: 0.97 }}
-          className="h-[58px] px-8 rounded-[24px] text-[14px] font-bold text-white shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 transition-all border-none cursor-pointer shrink-0"
+          className="h-[58px] px-10 rounded-[24px] text-[15px] font-extrabold text-white shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 transition-all border-none cursor-pointer shrink-0 whitespace-nowrap min-w-[130px]"
           style={{ background: 'var(--brand-primary)' }}
         >
           Search
@@ -197,7 +197,7 @@ export default function SearchBar({
           whileHover={{ scale: 1.06, rotate: 5, translateY: -2 }}
           whileTap={{ scale: 0.94 }}
           title="Use my location (G)"
-          className="glass glass-interactive w-[58px] h-[58px] rounded-[24px] flex items-center justify-center text-white/50 hover:text-white cursor-pointer transition-all duration-300 border-none"
+          className="glass glass-interactive w-[58px] h-[58px] rounded-[24px] flex items-center justify-center text-white/50 hover:text-white cursor-pointer transition-all duration-300 border-none shrink-0"
         >
           <LocateFixed size={20} />
         </motion.button>
