@@ -34,7 +34,7 @@ describe('POST /api/auth/login', () => {
       .post('/api/auth/login')
       .send({ email: 'nobody@test.com', password: 'wrong' });
     expect(res.status).toBe(400);
-    expect(res.body.message).toBe('Invalid Credentials');
+    expect(res.body.message).toBe('Invalid email or password.');
   });
 });
 
