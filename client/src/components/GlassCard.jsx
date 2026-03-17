@@ -1,33 +1,51 @@
 import { motion } from 'framer-motion';
 
 /**
- * Lightweight glass card — single source of truth for all card surfaces.
- * Replaces LiquidGlassCard for static, non-draggable content.
+ * GlassCard — canonical glass surface.
+ *
+ * Used as a primitive for any card that needs the standard glass look.
+ * Prefer this over manually writing glass styles in every component.
  */
-export default function GlassCard({ children, className = '', style = {}, padding = '40px 48px' }) {
+export default function GlassCard({
+  children,
+  className  = '',
+  style      = {},
+  padding    = 'var(--card-padding-md, 36px)',
+  hover      = true,
+  rounded    = '32px',
+  as         = 'div',
+  ...props
+}) {
+  const Tag = hover ? motion.div : as;
+  const hoverProps = hover
+    ? {
+        whileHover: { scale: 1.02, translateY: -6 },
+        whileTap:   { scale: 0.98 },
+        transition: { type: 'spring', stiffness: 350, damping: 25 },
+      }
+    : {};
+
   return (
-    <motion.div
-      whileHover={{ scale: 1.015, translateY: -4 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={`glass glass-interactive rounded-[24px] ${className}`}
-      style={{
-        padding,
-        ...style,
-      }}
+    <Tag
+      {...hoverProps}
+      {...props}
+      className={`glass glass-interactive rounded-[${rounded}] ${className}`}
+      style={{ padding, ...style }}
     >
       {children}
-    </motion.div>
+    </Tag>
   );
 }
 
-export function CardTitle({ children }) {
+export function CardTitle({ children, className = '' }) {
   return (
-    <p
-      className="text-[11px] font-bold uppercase tracking-[0.07em] mb-4"
-      style={{ color: 'rgba(255,255,255,0.38)' }}
-    >
+    <p className={`text-[11px] font-bold uppercase tracking-[0.12em] mb-4 ${className}`}
+      style={{ color: 'rgba(255,255,255,0.38)' }}>
       {children}
     </p>
   );
+}
+
+export function CardDivider() {
+  return <div className="h-px my-3" style={{ background: 'rgba(255,255,255,0.06)' }} />;
 }

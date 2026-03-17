@@ -1,23 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../lib/api';
 
-const MAX_HISTORY = 5;
+const MAX_HISTORY = 6;
+const CACHE_TTL   = 10 * 60 * 1000; // 10 min
 
 export function useWeather() {
   const [weatherData, setWeatherData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [searchHistory, setSearchHistory] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('searchHistory') || '[]');
-    } catch {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem('searchHistory') || '[]'); }
+    catch { return []; }
   });
+
+  // Track whether we already have data so the loading flag is correct
+  const hasData = useRef(false);
 
   const addToHistory = useCallback((cityName) => {
     setSearchHistory((prev) => {
-      const updated = [cityName, ...prev.filter((c) => c !== cityName)].slice(0, MAX_HISTORY);
+      const updated = [cityName, ...prev.filter(c => c !== cityName)].slice(0, MAX_HISTORY);
       localStorage.setItem('searchHistory', JSON.stringify(updated));
       return updated;
     });
@@ -26,52 +28,56 @@ export function useWeather() {
   const fetchWeather = useCallback(async (params) => {
     if (!params?.city && !(params?.lat && params?.lon)) return;
 
-    const cacheKey = params.city 
-      ? `weather_cache_${params.city.toLowerCase()}` 
+    const cacheKey = params.city
+      ? `weather_cache_${params.city.toLowerCase()}`
       : `weather_cache_coords_${params.lat}_${params.lon}`;
 
-    // Try to load from cache first
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      try {
-        const { data, timestamp } = JSON.parse(cached);
-        const isExpired = Date.now() - timestamp > 10 * 60 * 1000; // 10 mins
-        if (!isExpired) {
+    // Serve stale data immediately while refreshing in background
+    let servedFromCache = false;
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      if (raw) {
+        const { data, timestamp } = JSON.parse(raw);
+        if (Date.now() - timestamp < CACHE_TTL) {
           setWeatherData(data);
-          // Still fetch in background to refresh, but don't set loading if we have valid cache
-          // (Wait, user wants instant load, but silent refresh is better)
+          setLastUpdated(new Date(timestamp));
+          hasData.current = true;
+          servedFromCache = true;
         }
-      } catch (e) {
-        localStorage.removeItem(cacheKey);
       }
+    } catch {
+      /* corrupt cache — ignore */
     }
 
-    setLoading((prevLoading) => {
-      // If we don't have data, we must show loading
-      // If we do have data (from cache), we don't show loading (silent refresh)
-      return weatherData ? prevLoading : true;
-    });
+    // Only show the loading skeleton when there's nothing to show yet
+    if (!servedFromCache) {
+      setLoading(true);
+      hasData.current = false;
+    }
     setError(null);
 
     try {
-      let url;
-      if (params.city) {
-        url = `/api/weather?city=${encodeURIComponent(params.city)}`;
-      } else {
-        url = `/api/weather/coords?lat=${params.lat}&lon=${params.lon}`;
-      }
+      const url = params.city
+        ? `/api/weather?city=${encodeURIComponent(params.city)}`
+        : `/api/weather/coords?lat=${params.lat}&lon=${params.lon}`;
 
-      const response = await api.get(url);
-      setWeatherData(response.data);
-      addToHistory(response.data.current.city);
-      
-      // Save to cache
+      const response  = await api.get(url);
+      const freshData = response.data;
+
+      setWeatherData(freshData);
+      setLastUpdated(new Date());
+      hasData.current = true;
+      addToHistory(freshData.current.city);
+
       localStorage.setItem(cacheKey, JSON.stringify({
-        data: response.data,
-        timestamp: Date.now()
+        data:      freshData,
+        timestamp: Date.now(),
       }));
     } catch (err) {
-      setError(err.response?.data?.message || 'An unexpected error occurred. Please try again.');
+      // Only surface the error if we have nothing to show
+      if (!servedFromCache) {
+        setError(err.response?.data?.message || 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -82,20 +88,32 @@ export function useWeather() {
       setError('Geolocation is not supported by your browser.');
       return;
     }
+    setLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => fetchWeather({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-      () => setError('Unable to retrieve your location.')
+      () => { setLoading(false); setError('Unable to retrieve your location. Please allow location access.'); }
     );
   }, [fetchWeather]);
 
+  const clearHistory = useCallback(() => {
+    setSearchHistory([]);
+    localStorage.removeItem('searchHistory');
+  }, []);
+
+  // Load default city on mount
   useEffect(() => {
     const defaultCity = localStorage.getItem('defaultCity');
-    if (defaultCity) {
-      fetchWeather({ city: defaultCity });
-    }
-    // No silent geolocation on mount — user must click the button
+    if (defaultCity) fetchWeather({ city: defaultCity });
   }, [fetchWeather]);
 
-  return { weatherData, loading, error, searchHistory, fetchWeather, fetchByGeolocation };
+  return {
+    weatherData,
+    loading,
+    error,
+    lastUpdated,
+    searchHistory,
+    clearHistory,
+    fetchWeather,
+    fetchByGeolocation,
+  };
 }
-

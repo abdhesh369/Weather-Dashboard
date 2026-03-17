@@ -119,8 +119,15 @@ const authLimiter = rateLimit({
 });
 
 // ── Routes ───────────────────────────────────────────
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  const { getCacheStats } = await import('./cache.js');
+  res.json({
+    status:    'ok',
+    timestamp: new Date().toISOString(),
+    uptime:    Math.round(process.uptime()),
+    cache:     getCacheStats(),
+    memory:    process.memoryUsage().heapUsed,
+  });
 });
 
 app.use('/api/auth',      authLimiter, authRoutes);

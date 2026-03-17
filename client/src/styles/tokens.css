@@ -5,23 +5,24 @@
 
 :root {
   /* ── Brand ─────────────────────────────────────── */
-  --brand-primary:       #6366f1;
-  --brand-primary-hover: #4f46e5;
-  --brand-primary-soft:  rgba(99, 102, 241, 0.15);
-  --brand-purple:        #8b5cf6;
-  --brand-pink:          #ec4899;
+  --brand-primary:       #818cf8; /* Softer, brighter indigo */
+  --brand-primary-hover: #6366f1;
+  --brand-primary-soft:  rgba(129, 140, 248, 0.15);
+  --brand-purple:        #a78bfa; /* Vibrant violet */
+  --brand-pink:          #f472b6; /* Hoter pink */
+  --brand-cyan:          #22d3ee; /* Added cyan for fresh accents */
 
   /* ── Backgrounds ───────────────────────────────── */
-  --bg-base:    #030712;
-  --bg-surface: rgba(255, 255, 255, 0.03);
-  --bg-raised:  rgba(255, 255, 255, 0.06);
-  --bg-overlay: rgba(0, 0, 0, 0.45);
-  --brand-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+  --bg-base:    #020617; /* Deepest slate/obsidian */
+  --bg-surface: rgba(255, 255, 255, 0.02); /* More subtle surface */
+  --bg-raised:  rgba(255, 255, 255, 0.04);
+  --bg-overlay: rgba(0, 0, 0, 0.6); /* Darker overlay for modal pop */
+  --brand-glow: 0 0 30px rgba(129, 140, 248, 0.25);
 
   /* ── Borders ───────────────────────────────────── */
-  --border-subtle:  rgba(255, 255, 255, 0.08);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-strong:  rgba(255, 255, 255, 0.20);
+  --border-subtle:  rgba(255, 255, 255, 0.05); /* Softer borders */
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong:  rgba(255, 255, 255, 0.18);
 
   /* ── Text ──────────────────────────────────────── */
   --text-primary:   #f0f4ff;
@@ -40,20 +41,21 @@
   --color-info-bg: rgba(96, 165, 250, 0.12);
 
   /* ── Weather condition backgrounds ─────────────── */
-  --bg-clear:  linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #0369a1 100%);
-  --bg-clouds: linear-gradient(135deg, #334155 0%, #475569 50%, #64748b 100%);
-  --bg-rain:   linear-gradient(135deg, #1e3a5f 0%, #1e293b 50%, #0f172a 100%);
-  --bg-snow:   linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #e2e8f0 100%);
-  --bg-storm:  linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
-  --bg-default:linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  /* Premium multi-stop gradients for atmospheric depth */
+  --bg-clear:  linear-gradient(145deg, #0284c7 0%, #3b82f6 40%, #1e3a8a 100%);
+  --bg-clouds: linear-gradient(145deg, #1e293b 0%, #475569 45%, #64748b 100%);
+  --bg-rain:   linear-gradient(145deg, #0f172a 0%, #1e3a8a 50%, #172554 100%);
+  --bg-snow:   linear-gradient(145deg, #64748b 0%, #94a3b8 45%, #cbd5e1 100%);
+  --bg-storm:  linear-gradient(145deg, #09090b 0%, #312e81 40%, #171717 100%);
+  --bg-default:linear-gradient(145deg, #020617 0%, #1e1b4b 50%, #030712 100%);
 
   /* ── Glassmorphism ──────────────────────────────── */
-  --glass-bg:     rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-blur:   blur(32px);
-  --glass-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
-  --glass-inner-border: rgba(255, 255, 255, 0.07);
-  --glass-inner-glow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --glass-bg:     rgba(255, 255, 255, 0.025);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur:   blur(40px); /* Deeper blur */
+  --glass-shadow: 0 16px 32px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3);
+  --glass-inner-border: rgba(255, 255, 255, 0.05);
+  --glass-inner-glow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 1px 2px rgba(255, 255, 255, 0.15); /* Sharper white top highlight */
 
   /* ── Spacing scale ──────────────────────────────── */
   --space-1:  4px;
@@ -102,9 +104,57 @@
 
 /* ── Tailwind v4 theme extension ─────────────────── */
 @theme {
-  --color-brand-primary:       #6366f1;
-  --color-brand-primary-hover: #4f46e5;
-  --color-brand-soft:          rgba(99,102,241,0.15);
-  --color-brand-purple:        #8b5cf6;
-  --color-brand-pink:          #ec4899;
+  --color-brand-primary:       #818cf8;
+  --color-brand-primary-hover: #6366f1;
+  --color-brand-soft:          rgba(129, 140, 248, 0.15);
+  --color-brand-purple:        #a78bfa;
+  --color-brand-pink:          #f472b6;
+  --color-brand-cyan:          #22d3ee;
+}
+
+/* ── Z-index scale ──────────────────────────────────── */
+:root {
+  --z-below:   -1;
+  --z-base:     0;
+  --z-raised:  10;
+  --z-overlay: 20;
+  --z-modal:   30;
+  --z-toast:   40;
+  --z-navbar:  50;
+
+  /* ── Mobile nav ────────────────────────────────────── */
+  --mobile-nav-height: 80px; /* height + safe area */
+
+  /* ── Sidebar ───────────────────────────────────────── */
+  --sidebar-sticky-top: 112px; /* navbar + gap */
+
+  /* ── Component-specific ────────────────────────────── */
+  --card-padding-sm:  24px;
+  --card-padding-md:  36px;
+  --card-padding-lg:  48px;
+
+  /* ── Chart colors ───────────────────────────────────── */
+  --chart-temp-hi:    #f59e0b;
+  --chart-temp-lo:    #60a5fa;
+  --chart-precip:     #38bdf8;
+  --chart-humidity:   #06b6d4;
+  --chart-wind:       #a78bfa;
+
+  /* ── Status colors ──────────────────────────────────── */
+  --uv-low:       #4ade80;
+  --uv-moderate:  #facc15;
+  --uv-high:      #fb923c;
+  --uv-very-high: #f87171;
+  --uv-extreme:   #c084fc;
+
+  --aqi-good:      #22c55e;
+  --aqi-fair:      #84cc16;
+  --aqi-moderate:  #eab308;
+  --aqi-poor:      #f97316;
+  --aqi-very-poor: #ef4444;
+
+  /* ── Glass variants ─────────────────────────────────── */
+  --glass-subtle: rgba(255,255,255,0.02);
+  --glass-raised: rgba(255,255,255,0.06);
+  --glass-strong: rgba(255,255,255,0.10);
 }

@@ -28,10 +28,10 @@ body {
 .weather-bg-default { background: var(--bg-default); }
 
 /* ── Scrollbar ───────────────────────────────────── */
-::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar       { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: var(--radius-full); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); border: 2px solid transparent; background-clip: padding-box; }
 .scrollbar-hide { scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 
@@ -52,20 +52,24 @@ body {
   box-shadow: var(--glass-inner-glow), var(--glass-shadow);
   position: relative;
   overflow: hidden;
-  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.4s var(--ease-out),
+              border-color 0.4s var(--ease-out);
 }
 
 .glass-interactive:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--glass-inner-glow), 0 20px 60px rgba(0, 0, 0, 0.6);
-  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--glass-inner-glow), 
+              0 30px 60px rgba(0, 0, 0, 0.5), 
+              0 0 40px rgba(129, 140, 248, 0.15); /* Brand glow mix */
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .glass::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 40%, rgba(255,255,255,0.02) 100%);
+  background: radial-gradient(800px circle at top left, rgba(255,255,255,0.06), transparent 40%);
   pointer-events: none;
 }
 
@@ -161,4 +165,40 @@ input::placeholder { color: rgba(255,255,255,0.28); }
 /* ── Stat skeleton grid ──────────────────────────── */
 @media (max-width: 540px) {
   .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ── Print styles ─────────────────────────────────── */
+@media print {
+  .glass { background: white !important; color: black !important; border: 1px solid #ccc !important; }
+  nav, .fixed { display: none !important; }
+  body { background: white; color: black; }
+}
+
+/* ── Focus improvements ───────────────────────────── */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Reduce motion ────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Glass hover on mobile — no hover → no lift ───── */
+@media (hover: none) {
+  .glass-interactive:hover {
+    transform: none;
+    box-shadow: var(--glass-inner-glow), var(--glass-shadow);
+    border-color: var(--glass-border);
+  }
 }

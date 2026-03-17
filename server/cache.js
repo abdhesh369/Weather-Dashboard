@@ -1,50 +1,94 @@
-// NOTE: Using ioredis for the exported `redis` instance (used by rate-limit-redis)
-// and a simple async cache for weather data
+// ── Cache module ─────────────────────────────────────────────────────────────
+// Supports Redis (via ioredis) with in-memory fallback.
+// Memory cache performs periodic eviction of stale entries.
 
-let redisClient = null;
 let ioredisClient = null;
 
-// ── ioredis instance for rate-limit-redis ────────────
 export let redis = null;
+
+const MEM_TTL  = Number(process.env.CACHE_TTL_SECONDS  || 600) * 1000; // default 10 min
+const REDIS_TTL = Number(process.env.CACHE_TTL_SECONDS  || 600);
 
 if (process.env.REDIS_URL) {
   try {
     const ioredis = await import('ioredis');
-    const Redis = ioredis.default || ioredis.Redis;
-    ioredisClient = new Redis(process.env.REDIS_URL);
+    const Redis   = ioredis.default || ioredis.Redis;
+    ioredisClient = new Redis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 2,
+      connectTimeout: 5000,
+      lazyConnect: true,
+    });
     redis = ioredisClient;
 
-    ioredisClient.on('connect',  () => console.log('[Redis] Connected'));
-    ioredisClient.on('error',    (e) => console.warn('[Redis] Error:', e.message));
+    await ioredisClient.connect().catch(() => {}); // lazy
+    ioredisClient.on('connect',  ()  => console.log('[Cache] Redis connected'));
+    ioredisClient.on('error',    (e) => console.warn('[Cache] Redis error:', e.message));
   } catch (e) {
-    console.warn('[Redis] ioredis init failed, falling back to memory cache:', e.message);
+    console.warn('[Cache] ioredis init failed, using memory cache:', e.message);
+    ioredisClient = null;
   }
 }
 
-// ── In-memory fallback ───────────────────────────────
-const memCache = new Map();
-const MEM_TTL  = 10 * 60 * 1000; // 10 min
+// ── In-memory store ───────────────────────────────────────────────────────────
+const memCache  = new Map();
+let   cacheHits = 0;
+let   cacheMiss = 0;
 
+// Evict expired entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  let evicted = 0;
+  for (const [k, v] of memCache) {
+    if (now - v.ts > MEM_TTL) { memCache.delete(k); evicted++; }
+  }
+  if (evicted > 0) console.log(`[Cache] Evicted ${evicted} expired entries`);
+}, 5 * 60 * 1000);
+
+// ── Public API ────────────────────────────────────────────────────────────────
 export async function getCached(key) {
-  if (ioredisClient) {
+  if (ioredisClient?.status === 'ready') {
     try {
       const val = await ioredisClient.get(key);
-      return val ? JSON.parse(val) : null;
-    } catch { return null; }
+      if (val) { cacheHits++; return JSON.parse(val); }
+      cacheMiss++;
+      return null;
+    } catch { /* fall through to memory */ }
   }
-  // Memory fallback
+
   const entry = memCache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.ts > MEM_TTL) { memCache.delete(key); return null; }
+  if (!entry)                             { cacheMiss++; return null; }
+  if (Date.now() - entry.ts > MEM_TTL)   { memCache.delete(key); cacheMiss++; return null; }
+  cacheHits++;
   return entry.data;
 }
 
 export async function setCached(key, data) {
-  if (ioredisClient) {
-    try { await ioredisClient.set(key, JSON.stringify(data), 'EX', 600); } 
-    catch (e) { console.warn('[Redis] setCached error:', e.message); }
-    return;
+  if (ioredisClient?.status === 'ready') {
+    try {
+      await ioredisClient.set(key, JSON.stringify(data), 'EX', REDIS_TTL);
+      return;
+    } catch (e) {
+      console.warn('[Cache] Redis set failed, writing to memory:', e.message);
+    }
   }
-  // Memory fallback
   memCache.set(key, { data, ts: Date.now() });
+}
+
+export async function deleteCached(key) {
+  if (ioredisClient?.status === 'ready') {
+    try { await ioredisClient.del(key); } catch { /* ignore */ }
+  }
+  memCache.delete(key);
+}
+
+export function getCacheStats() {
+  return {
+    backend:   ioredisClient?.status === 'ready' ? 'redis' : 'memory',
+    memSize:   memCache.size,
+    hits:      cacheHits,
+    misses:    cacheMiss,
+    hitRate:   cacheHits + cacheMiss > 0
+      ? `${Math.round((cacheHits / (cacheHits + cacheMiss)) * 100)}%`
+      : 'n/a',
+  };
 }

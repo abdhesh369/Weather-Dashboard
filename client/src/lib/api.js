@@ -1,10 +1,12 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '',
+  baseURL:         import.meta.env.VITE_API_URL || '',
   withCredentials: true,
+  timeout:         12_000,
 });
 
+// ── CSRF init ────────────────────────────────────────────────────────────────
 export async function initCsrf() {
   try {
     const { data } = await api.get('/api/csrf-token');
@@ -14,15 +16,43 @@ export async function initCsrf() {
   }
 }
 
-// Intercept 401 — clear state, redirect to login
+// ── Response interceptor: refresh-token flow + 401 handling ─────────────────
+let refreshing = null; // shared promise so concurrent 401s don't double-refresh
+
 api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401 && window.location.pathname !== '/login') {
-      // Let AuthContext handle the redirect; just pass through
+  res => res,
+  async err => {
+    const original = err.config;
+
+    // Token expired → try silent refresh once
+    if (
+      err.response?.status === 401 &&
+      !original._retried &&
+      !original.url?.includes('/api/auth/') // don't retry auth routes
+    ) {
+      original._retried = true;
+      try {
+        if (!refreshing) {
+          refreshing = api.post('/api/auth/refresh').finally(() => { refreshing = null; });
+        }
+        await refreshing;
+        return api(original); // replay original request
+      } catch {
+        // Refresh failed — redirect to login
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
     }
+
     return Promise.reject(err);
   }
 );
+
+// ── Request interceptor: add request timestamp for debugging ─────────────────
+api.interceptors.request.use(config => {
+  config.metadata = { startTime: Date.now() };
+  return config;
+});
 
 export default api;
